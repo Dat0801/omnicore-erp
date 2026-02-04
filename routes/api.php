@@ -3,11 +3,13 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Modules\Product\Http\Controllers\Api\ProductController;
+use App\Modules\Order\Http\Controllers\Api\OrderController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('products', ProductController::class);
+    Route::apiResource('products', ProductController::class)->only(['index', 'show']);
+    Route::post('orders', [OrderController::class, 'store']);
 });

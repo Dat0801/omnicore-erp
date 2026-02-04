@@ -3,10 +3,14 @@
 namespace App\Modules\Product\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Modules\Product\Services\ProductService;
+use App\Modules\Product\Http\Requests\StoreProductRequest;
+use App\Modules\Product\Http\Requests\UpdateProductRequest;
 use App\Modules\Product\Models\Product;
-use Illuminate\Http\Request;
+use App\Modules\Product\Models\ProductCategory;
+use App\Modules\Product\Services\ProductService;
 use Inertia\Inertia;
+use Inertia\Response;
+use Illuminate\Http\RedirectResponse;
 
 class ProductController extends Controller
 {
@@ -14,7 +18,7 @@ class ProductController extends Controller
         protected ProductService $service
     ) {}
 
-    public function index()
+    public function index(): Response
     {
         $products = $this->service->listProducts();
         return Inertia::render('Product/Index', [
@@ -22,45 +26,42 @@ class ProductController extends Controller
         ]);
     }
 
-    public function create()
+    public function create(): Response
     {
-        return Inertia::render('Product/Create');
+        return Inertia::render('Product/Create', [
+            'categories' => ProductCategory::all(),
+        ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreProductRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'sku' => 'required|string|unique:products,sku',
-            'price' => 'required|numeric|min:0',
-            'description' => 'nullable|string',
-        ]);
-
-        $this->service->createProduct($validated);
+        $this->service->createProduct($request->validated());
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Product created successfully.');
     }
 
-    public function edit(Product $product)
+    public function edit(Product $product): Response
     {
         return Inertia::render('Product/Edit', [
-            'product' => $product
+            'product' => $product->load(['category', 'images']),
+            'categories' => ProductCategory::all(),
         ]);
     }
 
-    public function update(Request $request, Product $product)
+    public function update(UpdateProductRequest $request, Product $product): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'sku' => 'required|string|unique:products,sku,' . $product->id,
-            'price' => 'required|numeric|min:0',
-            'description' => 'nullable|string',
-        ]);
-
-        $this->service->updateProduct($product, $validated);
+        $this->service->updateProduct($product, $request->validated());
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Product updated successfully.');
+    }
+
+    public function destroy(Product $product): RedirectResponse
+    {
+        $this->service->deleteProduct($product);
+        
+        return redirect()->route('admin.products.index')
+            ->with('success', 'Product deactivated successfully.');
     }
 }
