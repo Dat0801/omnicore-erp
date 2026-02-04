@@ -10,17 +10,17 @@ class ProductRepository
 {
     public function getAll(): Collection
     {
-        return Product::all();
+        return Product::with(['category', 'images'])->get();
     }
 
     public function getPaginated(int $perPage = 15): LengthAwarePaginator
     {
-        return Product::latest()->paginate($perPage);
+        return Product::with(['category', 'images'])->latest()->paginate($perPage);
     }
 
     public function findById(int $id): ?Product
     {
-        return Product::find($id);
+        return Product::with(['category', 'images'])->find($id);
     }
 
     public function create(array $data): Product
@@ -36,6 +36,8 @@ class ProductRepository
 
     public function delete(Product $product): bool
     {
+        // Ideally this should not be called if soft delete is not allowed, 
+        // but if we ever need to hard delete, this is it.
         return $product->delete();
     }
 }
