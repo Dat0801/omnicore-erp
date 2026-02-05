@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('source_id'); // external ID/UUID
             $table->string('customer_email')->nullable();
             $table->string('customer_name')->nullable();
+            $table->foreignId('warehouse_id')->constrained()->onDelete('restrict');
             $table->timestamps();
 
             $table->unique(['source', 'source_id']);

@@ -18,6 +18,7 @@ class OrderController extends Controller
         $validated = $request->validate([
             'source' => 'required|string|in:webstore,pos',
             'source_id' => 'required|string',
+            'warehouse_id' => 'required|exists:warehouses,id',
             'total_amount' => 'required|numeric|min:0',
             'customer_email' => 'nullable|email',
             'customer_name' => 'nullable|string',
@@ -27,8 +28,14 @@ class OrderController extends Controller
             'items.*.price' => 'required|numeric|min:0',
         ]);
 
-        $order = $this->service->createOrder($validated);
-
-        return response()->json($order, 201);
+        try {
+            $order = $this->service->createOrder($validated);
+            return response()->json($order, 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Order processing failed',
+                'error' => $e->getMessage(),
+            ], 422);
+        }
     }
 }
