@@ -12,6 +12,7 @@ class Order extends Model
         'status',
         'source',
         'source_id',
+        'warehouse_id',
         'customer_email',
         'customer_name',
     ];
