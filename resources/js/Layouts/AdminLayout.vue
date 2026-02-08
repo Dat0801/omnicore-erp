@@ -65,7 +65,7 @@ const showingSidebar = ref(false);
             <header class="sticky top-0 z-10 flex h-16 flex-shrink-0 bg-white dark:bg-gray-800 shadow">
                 <button
                     type="button"
-                    class="border-r border-gray-200 dark:border-gray-700 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 lg:hidden"
+                    class="border-r border-gray-200 dark:border-gray-700 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 lg:hidden"
                     @click="showingSidebar = true"
                 >
                     <span class="sr-only">Open sidebar</span>

@@ -14,7 +14,7 @@ const props = defineProps({
 
 const classes = computed(() =>
     props.active
-        ? 'group flex items-center px-3 py-2 text-sm font-medium rounded-md bg-indigo-50 text-indigo-700 dark:bg-gray-800 dark:text-white'
+        ? 'group flex items-center px-3 py-2 text-sm font-medium rounded-md bg-blue-50 text-blue-700 dark:bg-gray-800 dark:text-white'
         : 'group flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
 );
 </script>

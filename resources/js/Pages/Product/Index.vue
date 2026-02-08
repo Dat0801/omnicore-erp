@@ -41,7 +41,7 @@ defineProps({
                                     <td class="px-6 py-4 whitespace-nowrap">{{ product.sku }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">{{ product.price }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <Link :href="route('admin.products.edit', product.id)" class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 mr-4">Edit</Link>
+                                        <Link :href="route('admin.products.edit', product.id)" class="text-blue-600 dark:text-blue-400 hover:text-blue-900 mr-4">Edit</Link>
                                     </td>
                                 </tr>
                                 <tr v-if="products.data.length === 0">
