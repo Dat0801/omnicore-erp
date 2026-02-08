@@ -13,9 +13,30 @@ class ProductRepository
         return Product::with(['category', 'images'])->get();
     }
 
-    public function getPaginated(int $perPage = 15): LengthAwarePaginator
+    public function getPaginated(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        return Product::with(['category', 'images'])->latest()->paginate($perPage);
+        $query = Product::with(['category', 'images'])->latest();
+
+        if (isset($filters['search']) && $filters['search']) {
+            $search = $filters['search'];
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('code', 'like', "%{$search}%")
+                  ->orWhereHas('category', function($q) use ($search) {
+                      $q->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        if (isset($filters['status']) && $filters['status'] !== 'all') {
+            if ($filters['status'] === 'active') {
+                $query->where('is_active', true);
+            } elseif ($filters['status'] === 'inactive') {
+                $query->where('is_active', false);
+            }
+        }
+
+        return $query->paginate($perPage);
     }
 
     public function findById(int $id): ?Product

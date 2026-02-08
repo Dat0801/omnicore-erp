@@ -14,10 +14,10 @@ class ProductService
         protected ProductRepository $repository
     ) {}
 
-    public function listProducts(bool $paginate = true): LengthAwarePaginator|iterable
+    public function listProducts(array $filters = [], bool $paginate = true): LengthAwarePaginator|iterable
     {
         if ($paginate) {
-            return $this->repository->getPaginated();
+            return $this->repository->getPaginated($filters);
         }
         return $this->repository->getAll();
     }
