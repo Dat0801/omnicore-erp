@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Modules\Product\Http\Controllers\Admin\ProductController;
+use App\Modules\Inventory\Http\Controllers\InventoryController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -22,6 +23,7 @@ Route::middleware('auth')->group(function () {
     // Admin Routes
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
         Route::resource('products', ProductController::class);
+        Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
     });
 });
 
