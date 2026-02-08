@@ -2,8 +2,8 @@
 
 namespace App\Modules\Product\Services;
 
-use App\Modules\Product\Repositories\ProductRepository;
 use App\Modules\Product\Models\Product;
+use App\Modules\Product\Repositories\ProductRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -14,11 +14,12 @@ class ProductService
         protected ProductRepository $repository
     ) {}
 
-    public function listProducts(bool $paginate = true): LengthAwarePaginator|iterable
+    public function listProducts(array $filters = [], bool $paginate = true): LengthAwarePaginator|iterable
     {
         if ($paginate) {
-            return $this->repository->getPaginated();
+            return $this->repository->getPaginated($filters);
         }
+
         return $this->repository->getAll();
     }
 
@@ -43,9 +44,9 @@ class ProductService
             $product = $this->repository->update($product, $productData);
 
             if (isset($data['images']) && is_array($data['images'])) {
-                // For simplicity, we might just append or replace. 
-                // Let's assume we replace or add new ones. 
-                // A better approach for update is often separate endpoints for images, 
+                // For simplicity, we might just append or replace.
+                // Let's assume we replace or add new ones.
+                // A better approach for update is often separate endpoints for images,
                 // but for a CRUD update, let's handle new files.
                 $this->syncImages($product, $data['images']);
             }

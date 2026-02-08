@@ -4,8 +4,6 @@ namespace App\Modules\Product\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Product\Services\ProductService;
-use App\Modules\Product\Models\Product;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 class ProductController extends Controller
@@ -18,14 +16,15 @@ class ProductController extends Controller
     {
         // External systems usually fetch all or paginated
         $products = $this->service->listProducts(paginate: true);
+
         return response()->json($products);
     }
 
     public function show(int $id): JsonResponse
     {
         $product = $this->service->getProduct($id);
-        
-        if (!$product) {
+
+        if (! $product) {
             return response()->json(['message' => 'Product not found'], 404);
         }
 
