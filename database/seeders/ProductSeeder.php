@@ -37,7 +37,7 @@ class ProductSeeder extends Seeder
             'product_category_id' => $clothing->id,
             'is_active' => true,
         ]);
-        
+
         // Inactive product
         Product::create([
             'name' => 'Old Phone',

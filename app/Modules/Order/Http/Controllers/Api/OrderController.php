@@ -4,8 +4,8 @@ namespace App\Modules\Order\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Order\Services\OrderService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
@@ -30,6 +30,7 @@ class OrderController extends Controller
 
         try {
             $order = $this->service->createOrder($validated);
+
             return response()->json($order, 201);
         } catch (\Exception $e) {
             return response()->json([

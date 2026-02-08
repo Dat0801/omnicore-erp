@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\Role;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -24,6 +23,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'is_active',
+        'last_login_at',
     ];
 
     /**
@@ -47,6 +48,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'role' => Role::class,
+            'is_active' => 'boolean',
+            'last_login_at' => 'datetime',
         ];
     }
 

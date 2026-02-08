@@ -8,7 +8,6 @@ use App\Modules\Inventory\Models\Warehouse;
 use App\Modules\Product\Models\Product;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
-use Inertia\Response;
 
 class InventoryController extends Controller
 {
@@ -19,12 +18,12 @@ class InventoryController extends Controller
         $lowStockAlerts = Inventory::whereColumn('quantity', '<=', 'reorder_level')
             ->where('quantity', '>', 0) // Assuming low stock is not out of stock, or should it include? Image says "Needs restock" for low stock alerts. Usually includes out of stock too if reorder level > 0.
             ->count();
-            
+
         // Let's refine lowStockAlerts: usually anything <= reorder_level
         $lowStockAlerts = Inventory::whereColumn('quantity', '<=', 'reorder_level')->count();
 
         $activeWarehouses = Warehouse::where('is_active', true)->count();
-        
+
         // Total Valuation: Sum(Inventory.quantity * Product.price)
         $totalValuation = Inventory::join('products', 'inventories.product_id', '=', 'products.id')
             ->selectRaw('SUM(inventories.quantity * products.price) as total_value')
@@ -43,7 +42,7 @@ class InventoryController extends Controller
             switch ($request->status) {
                 case 'low_stock':
                     $query->whereColumn('quantity', '<=', 'reorder_level')
-                          ->where('quantity', '>', 0);
+                        ->where('quantity', '>', 0);
                     break;
                 case 'out_of_stock':
                     $query->where('quantity', 0);
@@ -53,13 +52,13 @@ class InventoryController extends Controller
                     break;
             }
         }
-        
+
         // Search
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->whereHas('product', function($q) use ($search) {
+            $query->whereHas('product', function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%");
+                    ->orWhere('code', 'like', "%{$search}%");
             });
         }
 

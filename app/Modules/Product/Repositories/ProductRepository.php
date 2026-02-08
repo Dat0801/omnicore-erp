@@ -3,8 +3,8 @@
 namespace App\Modules\Product\Repositories;
 
 use App\Modules\Product\Models\Product;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 class ProductRepository
 {
@@ -19,12 +19,12 @@ class ProductRepository
 
         if (isset($filters['search']) && $filters['search']) {
             $search = $filters['search'];
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('code', 'like', "%{$search}%")
-                  ->orWhereHas('category', function($q) use ($search) {
-                      $q->where('name', 'like', "%{$search}%");
-                  });
+                    ->orWhere('code', 'like', "%{$search}%")
+                    ->orWhereHas('category', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -52,12 +52,13 @@ class ProductRepository
     public function update(Product $product, array $data): Product
     {
         $product->update($data);
+
         return $product;
     }
 
     public function delete(Product $product): bool
     {
-        // Ideally this should not be called if soft delete is not allowed, 
+        // Ideally this should not be called if soft delete is not allowed,
         // but if we ever need to hard delete, this is it.
         return $product->delete();
     }

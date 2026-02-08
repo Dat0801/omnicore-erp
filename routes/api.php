@@ -1,10 +1,10 @@
 <?php
 
+use App\Modules\Inventory\Http\Controllers\Api\InventoryController;
+use App\Modules\Order\Http\Controllers\Api\OrderController;
+use App\Modules\Product\Http\Controllers\Api\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Modules\Product\Http\Controllers\Api\ProductController;
-use App\Modules\Order\Http\Controllers\Api\OrderController;
-use App\Modules\Inventory\Http\Controllers\Api\InventoryController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();

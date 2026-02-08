@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use App\Modules\Inventory\Models\Inventory;
 use App\Modules\Inventory\Models\Warehouse;
 use App\Modules\Inventory\Services\InventoryService;
 use App\Modules\Product\Models\Product;
@@ -31,7 +30,7 @@ class InventoryTest extends TestCase
             'name' => 'Test Product',
             'code' => 'TEST-SKU',
             'price' => 100,
-            'product_category_id' => $category->id
+            'product_category_id' => $category->id,
         ]);
 
         $this->inventoryService->addStock($warehouse->id, $product->id, 10, 'Initial Stock');
@@ -39,13 +38,13 @@ class InventoryTest extends TestCase
         $this->assertDatabaseHas('inventories', [
             'warehouse_id' => $warehouse->id,
             'product_id' => $product->id,
-            'quantity' => 10
+            'quantity' => 10,
         ]);
 
         $this->assertDatabaseHas('stock_movements', [
             'type' => 'in',
             'quantity' => 10,
-            'reason' => 'Initial Stock'
+            'reason' => 'Initial Stock',
         ]);
     }
 
@@ -57,7 +56,7 @@ class InventoryTest extends TestCase
             'name' => 'Test Product',
             'code' => 'TEST-SKU',
             'price' => 100,
-            'product_category_id' => $category->id
+            'product_category_id' => $category->id,
         ]);
 
         $this->inventoryService->addStock($warehouse->id, $product->id, 10, 'Initial Stock');
@@ -66,13 +65,13 @@ class InventoryTest extends TestCase
         $this->assertDatabaseHas('inventories', [
             'warehouse_id' => $warehouse->id,
             'product_id' => $product->id,
-            'quantity' => 6
+            'quantity' => 6,
         ]);
 
         $this->assertDatabaseHas('stock_movements', [
             'type' => 'out',
             'quantity' => 4,
-            'reason' => 'Sold'
+            'reason' => 'Sold',
         ]);
     }
 
@@ -84,7 +83,7 @@ class InventoryTest extends TestCase
             'name' => 'Test Product',
             'code' => 'TEST-SKU',
             'price' => 100,
-            'product_category_id' => $category->id
+            'product_category_id' => $category->id,
         ]);
 
         $this->inventoryService->addStock($warehouse->id, $product->id, 5, 'Initial Stock');
@@ -104,7 +103,7 @@ class InventoryTest extends TestCase
             'name' => 'Test Product',
             'code' => 'TEST-SKU',
             'price' => 100,
-            'product_category_id' => $category->id
+            'product_category_id' => $category->id,
         ]);
 
         $this->inventoryService->addStock($warehouse->id, $product->id, 20, 'Initial Stock');
@@ -115,7 +114,7 @@ class InventoryTest extends TestCase
             ->assertJson([
                 'warehouse_id' => $warehouse->id,
                 'product_id' => $product->id,
-                'quantity' => 20
+                'quantity' => 20,
             ]);
     }
 }

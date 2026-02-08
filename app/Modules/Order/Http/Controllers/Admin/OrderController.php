@@ -18,8 +18,8 @@ class OrderController extends Controller
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('id', 'like', "%{$search}%")
-                  ->orWhere('customer_name', 'like', "%{$search}%")
-                  ->orWhere('customer_email', 'like', "%{$search}%");
+                    ->orWhere('customer_name', 'like', "%{$search}%")
+                    ->orWhere('customer_email', 'like', "%{$search}%");
             });
         }
 
@@ -31,7 +31,7 @@ class OrderController extends Controller
         if ($request->has('status') && $request->input('status') !== 'All Statuses') {
             $query->where('status', $request->input('status'));
         }
-        
+
         if ($request->has('date_range')) {
             // Simple implementation for now, expecting array of dates or handled by frontend to send start/end
             // Skipping complex date range logic for MVP, can be added later

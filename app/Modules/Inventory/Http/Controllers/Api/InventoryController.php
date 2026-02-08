@@ -5,7 +5,6 @@ namespace App\Modules\Inventory\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Modules\Inventory\Services\InventoryService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class InventoryController extends Controller
 {

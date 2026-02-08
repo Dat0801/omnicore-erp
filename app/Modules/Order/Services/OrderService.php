@@ -2,12 +2,12 @@
 
 namespace App\Modules\Order\Services;
 
+use App\Modules\Inventory\Services\InventoryService;
 use App\Modules\Order\Models\Order;
 use App\Modules\Order\Models\OrderItem;
-use Illuminate\Support\Facades\DB;
 use App\Modules\Product\Models\Product;
-use App\Modules\Inventory\Services\InventoryService;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 class OrderService
 {
@@ -57,7 +57,7 @@ class OrderService
                         null
                     );
                 } catch (Exception $e) {
-                    throw new Exception("Stock error for product '{$product->name}': " . $e->getMessage());
+                    throw new Exception("Stock error for product '{$product->name}': ".$e->getMessage());
                 }
             }
 

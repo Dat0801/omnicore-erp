@@ -2,28 +2,30 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
-use App\Modules\Product\Models\Product;
-use App\Modules\Product\Models\ProductCategory;
+use App\Models\User;
 use App\Modules\Inventory\Models\Warehouse;
 use App\Modules\Inventory\Services\InventoryService;
-use App\Models\User;
+use App\Modules\Product\Models\Product;
+use App\Modules\Product\Models\ProductCategory;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class OrderTest extends TestCase
 {
     use RefreshDatabase;
 
     protected $user;
+
     protected $warehouse;
+
     protected $product;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->user = User::factory()->create();
-        
+
         $this->warehouse = Warehouse::create([
             'name' => 'Test Warehouse',
             'code' => 'WH-TEST',
@@ -59,22 +61,22 @@ class OrderTest extends TestCase
                 [
                     'product_id' => $this->product->id,
                     'quantity' => 2,
-                    'price' => 100.00
-                ]
-            ]
+                    'price' => 100.00,
+                ],
+            ],
         ]);
 
         $response->assertStatus(201);
-        
+
         $this->assertDatabaseHas('orders', [
             'source_id' => 'WS-1001',
             'total_amount' => 200.00,
             'warehouse_id' => $this->warehouse->id,
         ]);
-        
+
         $this->assertDatabaseHas('order_items', [
             'product_id' => $this->product->id,
-            'quantity' => 2
+            'quantity' => 2,
         ]);
 
         // Verify stock deduction
@@ -94,14 +96,14 @@ class OrderTest extends TestCase
                 [
                     'product_id' => $this->product->id,
                     'quantity' => 15, // Only 10 in stock
-                    'price' => 100.00
-                ]
-            ]
+                    'price' => 100.00,
+                ],
+            ],
         ]);
 
         $response->assertStatus(422);
         $response->assertJsonFragment(['message' => 'Order processing failed']);
-        
+
         // Ensure order was not created
         $this->assertDatabaseMissing('orders', [
             'source_id' => 'WS-FAIL',
@@ -132,9 +134,9 @@ class OrderTest extends TestCase
                 [
                     'product_id' => $this->product->id,
                     'quantity' => 1,
-                    'price' => 100.00
-                ]
-            ]
+                    'price' => 100.00,
+                ],
+            ],
         ];
 
         // First request
@@ -142,11 +144,11 @@ class OrderTest extends TestCase
 
         // Second request (idempotency)
         $response = $this->actingAs($this->user, 'sanctum')->postJson('/api/orders', $payload);
-        
+
         $response->assertStatus(201);
         // Ensure only one order in DB
         $this->assertDatabaseCount('orders', 1);
-        
+
         // Ensure stock deducted only once
         $inventoryService = app(InventoryService::class);
         $stock = $inventoryService->getStock($this->warehouse->id, $this->product->id);
