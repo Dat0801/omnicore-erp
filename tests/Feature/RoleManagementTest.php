@@ -62,4 +62,27 @@ class RoleManagementTest extends TestCase
                 ->where('stats.staff', 3)
             );
     }
+
+    public function test_admin_can_visit_role_permissions_page()
+    {
+        $admin = User::factory()->create(['role' => Role::ADMIN]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.roles.permissions.edit', Role::MANAGER->value))
+            ->assertStatus(200)
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Role/Permissions')
+                ->where('role.value', Role::MANAGER->value)
+                ->where('role.label', Role::MANAGER->label())
+            );
+    }
+
+    public function test_staff_cannot_visit_role_permissions_page()
+    {
+        $staff = User::factory()->create(['role' => Role::STAFF]);
+
+        $this->actingAs($staff)
+            ->get(route('admin.roles.permissions.edit', Role::MANAGER->value))
+            ->assertStatus(403);
+    }
 }

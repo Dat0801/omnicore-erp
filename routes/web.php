@@ -31,6 +31,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
+        Route::get('/roles/{role}/permissions', [RoleController::class, 'editPermissions'])->name('roles.permissions.edit');
         Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
         Route::get('/warehouses', [WarehouseController::class, 'index'])->name('warehouses.index');
         Route::get('/warehouses/{warehouse}', [WarehouseController::class, 'show'])->name('warehouses.show');
