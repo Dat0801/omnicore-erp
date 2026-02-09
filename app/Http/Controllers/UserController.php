@@ -46,11 +46,6 @@ class UserController extends Controller
         return Inertia::render('User/Index', [
             'users' => $users,
             'filters' => $request->only(['search', 'role', 'status']),
-            'stats' => [
-                'admins' => User::where('role', Role::ADMIN)->count(),
-                'managers' => User::where('role', Role::MANAGER)->count(),
-                'staff' => User::where('role', Role::STAFF)->count(),
-            ],
             'roles' => collect(Role::cases())->map(fn ($role) => [
                 'value' => $role->value,
                 'label' => $role->label(),

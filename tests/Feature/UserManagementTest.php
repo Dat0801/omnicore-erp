@@ -22,7 +22,7 @@ class UserManagementTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page
                 ->component('User/Index')
                 ->has('users.data')
-                ->has('stats')
+                ->has('roles')
             );
     }
 
@@ -85,7 +85,7 @@ class UserManagementTest extends TestCase
         User::factory()->count(3)->create(['role' => Role::STAFF]);
 
         $this->actingAs($admin)
-            ->get(route('admin.users.index'))
+            ->get(route('admin.roles.index'))
             ->assertStatus(200)
             ->assertInertia(fn (Assert $page) => $page
                 ->where('stats.admins', 1)

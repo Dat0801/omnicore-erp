@@ -1,9 +1,12 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Modules\Inventory\Http\Controllers\InventoryController;
+use App\Modules\Inventory\Http\Controllers\WarehouseController;
 use App\Modules\Order\Http\Controllers\Admin\OrderController;
+use App\Modules\Product\Http\Controllers\Admin\CategoryController;
 use App\Modules\Product\Http\Controllers\Admin\ProductController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -24,8 +27,14 @@ Route::middleware('auth')->group(function () {
     // Admin Routes
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
         Route::resource('products', ProductController::class);
+        Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
+        Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
+        Route::get('/roles/{role}/permissions', [RoleController::class, 'editPermissions'])->name('roles.permissions.edit');
         Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
+        Route::get('/warehouses', [WarehouseController::class, 'index'])->name('warehouses.index');
+        Route::get('/warehouses/{warehouse}', [WarehouseController::class, 'show'])->name('warehouses.show');
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     });
 });

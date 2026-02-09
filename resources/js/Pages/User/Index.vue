@@ -4,12 +4,10 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import debounce from 'lodash/debounce';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
 
 const props = defineProps({
     users: Object,
     filters: Object,
-    stats: Object,
     roles: Array,
 });
 
@@ -27,8 +25,8 @@ const updateFilters = debounce(() => {
 
 watch([search, role, status], updateFilters);
 
-const getRoleBadgeClass = (role) => {
-    switch (role) {
+const getRoleBadgeClass = (roleValue) => {
+    switch (roleValue) {
         case 'admin':
             return 'bg-blue-600 text-white';
         case 'manager':
@@ -47,23 +45,23 @@ const getRoleLabel = (roleValue) => {
 </script>
 
 <template>
-    <Head title="User & Role Management" />
+    <Head title="User Management" />
 
     <AdminLayout>
         <div class="space-y-6">
             <!-- Header -->
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-900">User & Role Management</h2>
-                    <p class="text-sm text-gray-500 mt-1">Configure user access levels and internal permissions.</p>
+                    <h2 class="text-2xl font-bold text-gray-900">User Management</h2>
+                    <p class="text-sm text-gray-500 mt-1">Manage users and assign roles across the system.</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
+                    <Link :href="route('admin.roles.index')" class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                         <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                         </svg>
                         Manage Roles
-                    </button>
+                    </Link>
                     <PrimaryButton>
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
@@ -204,57 +202,6 @@ const getRoleLabel = (roleValue) => {
                                     v-html="link.label"
                                 />
                             </nav>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Admins -->
-                <div class="bg-white overflow-hidden shadow-sm rounded-lg p-6 border border-gray-100">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Admins</p>
-                            <h3 class="text-3xl font-bold text-gray-900 mt-2">{{ String(stats.admins).padStart(2, '0') }}</h3>
-                            <p class="text-xs text-green-500 mt-2">Full System Access</p>
-                        </div>
-                        <div class="p-2 bg-blue-50 rounded-full">
-                            <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Managers -->
-                <div class="bg-white overflow-hidden shadow-sm rounded-lg p-6 border border-gray-100">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Managers</p>
-                            <h3 class="text-3xl font-bold text-gray-900 mt-2">{{ String(stats.managers).padStart(2, '0') }}</h3>
-                            <p class="text-xs text-gray-500 mt-2">Departmental Access</p>
-                        </div>
-                        <div class="p-2 bg-indigo-50 rounded-full">
-                            <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z"/>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Staff -->
-                <div class="bg-white overflow-hidden shadow-sm rounded-lg p-6 border border-gray-100">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Staff</p>
-                            <h3 class="text-3xl font-bold text-gray-900 mt-2">{{ String(stats.staff).padStart(2, '0') }}</h3>
-                            <p class="text-xs text-gray-500 mt-2">Operational Access</p>
-                        </div>
-                        <div class="p-2 bg-gray-50 rounded-full">
-                            <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                            </svg>
                         </div>
                     </div>
                 </div>
