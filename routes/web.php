@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Modules\Inventory\Http\Controllers\InventoryController;
+use App\Modules\Inventory\Http\Controllers\WarehouseController;
 use App\Modules\Order\Http\Controllers\Admin\OrderController;
 use App\Modules\Product\Http\Controllers\Admin\CategoryController;
 use App\Modules\Product\Http\Controllers\Admin\ProductController;
@@ -29,6 +30,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
+        Route::get('/warehouses', [WarehouseController::class, 'index'])->name('warehouses.index');
+        Route::get('/warehouses/{warehouse}', [WarehouseController::class, 'show'])->name('warehouses.show');
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     });
 });
