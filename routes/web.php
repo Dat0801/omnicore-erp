@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Modules\Inventory\Http\Controllers\InventoryController;
 use App\Modules\Inventory\Http\Controllers\WarehouseController;
@@ -29,6 +30,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
         Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
         Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
         Route::get('/warehouses', [WarehouseController::class, 'index'])->name('warehouses.index');
         Route::get('/warehouses/{warehouse}', [WarehouseController::class, 'show'])->name('warehouses.show');
