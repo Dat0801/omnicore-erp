@@ -117,6 +117,8 @@ const toggleProductStatus = (product) => {
                                     </th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Product</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">SKU</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Price</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Stock</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Category</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
@@ -144,7 +146,20 @@ const toggleProductStatus = (product) => {
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-500 font-mono">{{ product.code || product.sku || 'N/A' }}</div>
+                                        <div class="text-sm text-gray-500 font-mono">{{ product.sku || 'N/A' }}</div>
+                                        <div class="text-xs text-gray-400">{{ product.barcode }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900 dark:text-gray-200 font-medium">${{ Number(product.price).toFixed(2) }}</div>
+                                        <div v-if="product.cost_price" class="text-xs text-gray-500">Cost: ${{ Number(product.cost_price).toFixed(2) }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span :class="{'text-red-600 font-bold': (Number(product.inventories_sum_quantity || 0) + Number(product.variants_inventories_sum_quantity || 0)) <= 0, 'text-green-600': (Number(product.inventories_sum_quantity || 0) + Number(product.variants_inventories_sum_quantity || 0)) > 0}" class="text-sm">
+                                            {{ Number(product.inventories_sum_quantity || 0) + Number(product.variants_inventories_sum_quantity || 0) }} {{ product.unit || 'pcs' }}
+                                        </span>
+                                        <div v-if="product.has_variants" class="text-xs text-blue-600 mt-1">
+                                            {{ product.variants ? product.variants.length : 0 }} variants
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">

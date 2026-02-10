@@ -20,6 +20,19 @@ class ProductController extends Controller
         protected ProductService $service
     ) {}
 
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+        
+        $products = Product::query()
+            ->where('name', 'like', "%{$query}%")
+            ->orWhere('sku', 'like', "%{$query}%")
+            ->limit(20)
+            ->get(['id', 'name', 'sku', 'price', 'product_category_id']);
+            
+        return response()->json($products);
+    }
+
     public function index(Request $request): Response
     {
         $filters = $request->only(['search', 'status']);
@@ -74,8 +87,30 @@ class ProductController extends Controller
 
     public function edit(Product $product): Response
     {
+        $product->load(['category', 'images', 'variants']);
+
+        // Load inventory data for default warehouse
+        $inventory = Inventory::where('product_id', $product->id)
+            ->whereHas('warehouse', function($q) {
+                $q->where('code', 'DEFAULT');
+            })->first();
+
+        $product->quantity = $inventory ? $inventory->quantity : 0;
+        $product->low_stock_threshold = $inventory ? $inventory->reorder_level : 0;
+
+        // Load inventory for variants if they exist
+        if ($product->has_variants) {
+            foreach ($product->variants as $variant) {
+                $variantInventory = Inventory::where('product_id', $variant->id)
+                    ->whereHas('warehouse', function($q) {
+                        $q->where('code', 'DEFAULT');
+                    })->first();
+                $variant->quantity = $variantInventory ? $variantInventory->quantity : 0;
+            }
+        }
+
         return Inertia::render('Product/Edit', [
-            'product' => $product->load(['category', 'images']),
+            'product' => $product,
             'categories' => ProductCategory::all(),
         ]);
     }

@@ -61,12 +61,12 @@ const managerInitials = (name) => {
                     <div class="text-xs text-gray-500">Home / Warehouses</div>
                     <h2 class="text-2xl font-bold text-gray-900">Warehouse Management</h2>
                 </div>
-                <button class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
+                <Link :href="route('admin.warehouses.create')" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
                     <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
                     </svg>
                     Add Warehouse
-                </button>
+                </Link>
             </div>
 
             <div class="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
@@ -180,15 +180,27 @@ const managerInitials = (name) => {
                                     {{ formatCurrency(warehouse.stock_value) }}
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <Link
-                                        :href="route('admin.warehouses.show', warehouse.id)"
-                                        class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:bg-gray-50"
-                                    >
-                                        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                            <path d="M2 10c1.5-3 4.5-5 8-5s6.5 2 8 5c-1.5 3-4.5 5-8 5s-6.5-2-8-5z" />
-                                            <path d="M10 13a3 3 0 100-6 3 3 0 000 6z" />
-                                        </svg>
-                                    </Link>
+                                    <div class="flex items-center justify-end gap-2">
+                                        <Link
+                                            :href="route('admin.warehouses.show', warehouse.id)"
+                                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:bg-gray-50"
+                                            title="View Details"
+                                        >
+                                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
+                                            </svg>
+                                        </Link>
+                                        <Link
+                                            :href="route('admin.warehouses.edit', warehouse.id)"
+                                            class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-blue-600 transition hover:bg-blue-50"
+                                            title="Edit Warehouse"
+                                        >
+                                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                            </svg>
+                                        </Link>
+                                    </div>
                                 </td>
                             </tr>
                             <tr v-if="warehouses.data.length === 0">

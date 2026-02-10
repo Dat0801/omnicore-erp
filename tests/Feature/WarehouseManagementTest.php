@@ -91,11 +91,9 @@ class WarehouseManagementTest extends TestCase
             'is_active' => true,
         ]);
 
-        $category = ProductCategory::create(['name' => 'Electronics']);
-        $product = Product::create([
+        $category = ProductCategory::factory()->create(['name' => 'Electronics']);
+        $product = Product::factory()->create([
             'name' => 'Sensor Module',
-            'code' => 'PRO-882-X',
-            'price' => 1200,
             'product_category_id' => $category->id,
         ]);
 
@@ -115,5 +113,98 @@ class WarehouseManagementTest extends TestCase
                 ->where('metrics.totalSkus', 1)
                 ->has('inventories.data', 1)
             );
+    }
+
+    public function test_admin_can_create_warehouse(): void
+    {
+        $admin = User::factory()->create(['role' => Role::ADMIN]);
+
+        $response = $this->actingAs($admin)
+            ->post(route('admin.warehouses.store'), [
+                'name' => 'New Warehouse',
+                'code' => 'WH-NEW',
+                'address' => 'New Address',
+                'is_active' => true,
+            ]);
+
+        $response->assertRedirect(route('admin.warehouses.index'));
+        $this->assertDatabaseHas('warehouses', [
+            'name' => 'New Warehouse',
+            'code' => 'WH-NEW',
+        ]);
+    }
+
+    public function test_admin_can_update_warehouse(): void
+    {
+        $admin = User::factory()->create(['role' => Role::ADMIN]);
+        $warehouse = Warehouse::create([
+            'name' => 'Old Name',
+            'code' => 'WH-OLD',
+            'address' => 'Old Address',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->put(route('admin.warehouses.update', $warehouse), [
+                'name' => 'Updated Name',
+                'code' => 'WH-UPDATED',
+                'address' => 'Updated Address',
+                'is_active' => false,
+            ]);
+
+        $response->assertRedirect(route('admin.warehouses.index'));
+        $this->assertDatabaseHas('warehouses', [
+            'id' => $warehouse->id,
+            'name' => 'Updated Name',
+            'code' => 'WH-UPDATED',
+            'is_active' => false,
+        ]);
+    }
+
+    public function test_admin_can_delete_warehouse_without_inventory(): void
+    {
+        $admin = User::factory()->create(['role' => Role::ADMIN]);
+        $warehouse = Warehouse::create([
+            'name' => 'Empty Warehouse',
+            'code' => 'WH-EMPTY',
+            'address' => 'Nowhere',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->delete(route('admin.warehouses.destroy', $warehouse));
+
+        $response->assertRedirect(route('admin.warehouses.index'));
+        $this->assertDatabaseMissing('warehouses', ['id' => $warehouse->id]);
+    }
+
+    public function test_admin_cannot_delete_warehouse_with_inventory(): void
+    {
+        $admin = User::factory()->create(['role' => Role::ADMIN]);
+        $warehouse = Warehouse::create([
+            'name' => 'Stocked Warehouse',
+            'code' => 'WH-STOCKED',
+            'address' => 'Somewhere',
+            'is_active' => true,
+        ]);
+
+        $category = ProductCategory::factory()->create(['name' => 'Electronics']);
+        $product = Product::factory()->create([
+            'name' => 'Widget',
+            'product_category_id' => $category->id,
+        ]);
+
+        Inventory::create([
+            'warehouse_id' => $warehouse->id,
+            'product_id' => $product->id,
+            'quantity' => 10,
+            'reorder_level' => 5,
+        ]);
+
+        $response = $this->actingAs($admin)
+            ->delete(route('admin.warehouses.destroy', $warehouse));
+
+        $response->assertSessionHasErrors('error');
+        $this->assertDatabaseHas('warehouses', ['id' => $warehouse->id]);
     }
 }

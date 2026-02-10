@@ -3,6 +3,8 @@ import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import { debounce } from 'lodash';
+import AdjustStockModal from './Partials/AdjustStockModal.vue';
+import TransferStockModal from './Partials/TransferStockModal.vue';
 
 const props = defineProps({
     stats: Object,
@@ -14,6 +16,9 @@ const props = defineProps({
 const search = ref(props.filters.current.search || '');
 const warehouseId = ref(props.filters.current.warehouse_id || 'all');
 const status = ref(props.filters.current.status || 'all');
+const showAdjustModal = ref(false);
+const showTransferModal = ref(false);
+const selectedInventory = ref(null);
 
 watch([search, warehouseId, status], debounce(([newSearch, newWarehouseId, newStatus]) => {
     router.get(route('admin.inventory.index'), {
@@ -37,6 +42,22 @@ const formatCurrency = (value) => {
 
 const formatNumber = (value) => {
     return new Intl.NumberFormat('en-US').format(value);
+};
+
+const openAdjustModal = (item) => {
+    selectedInventory.value = item;
+    showAdjustModal.value = true;
+};
+
+const openTransferModal = (item) => {
+    selectedInventory.value = item;
+    showTransferModal.value = true;
+};
+
+const closeModals = () => {
+    showAdjustModal.value = false;
+    showTransferModal.value = false;
+    selectedInventory.value = null;
 };
 </script>
 
@@ -243,12 +264,31 @@ const formatNumber = (value) => {
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-right">
-                                <button class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center justify-end gap-1 ml-auto">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    Movement History
-                                </button>
+                                <div class="flex items-center justify-end gap-2">
+                                    <button 
+                                        @click="openAdjustModal(item)"
+                                        class="text-blue-600 hover:text-blue-800 p-1 rounded-md hover:bg-blue-50"
+                                        title="Adjust Stock"
+                                    >
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                                        </svg>
+                                    </button>
+                                    <button 
+                                        @click="openTransferModal(item)"
+                                        class="text-indigo-600 hover:text-indigo-800 p-1 rounded-md hover:bg-indigo-50"
+                                        title="Transfer Stock"
+                                    >
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                        </svg>
+                                    </button>
+                                    <button class="text-gray-600 hover:text-gray-800 p-1 rounded-md hover:bg-gray-50" title="Movement History">
+                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                         <tr v-if="inventories.data.length === 0">
@@ -325,5 +365,18 @@ const formatNumber = (value) => {
                 </div>
             </div>
         </div>
+
+        <AdjustStockModal
+            :show="showAdjustModal"
+            :inventory="selectedInventory"
+            @close="closeModals"
+        />
+
+        <TransferStockModal
+            :show="showTransferModal"
+            :inventory="selectedInventory"
+            :warehouses="filters.warehouses"
+            @close="closeModals"
+        />
     </AdminLayout>
 </template>
