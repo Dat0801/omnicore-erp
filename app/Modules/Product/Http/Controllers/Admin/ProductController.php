@@ -85,6 +85,19 @@ class ProductController extends Controller
             ->with('success', 'Product created successfully.');
     }
 
+    public function show(Product $product): Response
+    {
+        $product->load(['category', 'images', 'variants' => function ($query) {
+            $query->withSum('inventories', 'quantity');
+        }, 'variants.images']);
+
+        $product->loadSum('inventories', 'quantity');
+
+        return Inertia::render('Product/Show', [
+            'product' => $product,
+        ]);
+    }
+
     public function edit(Product $product): Response
     {
         $product->load(['category', 'images', 'variants']);
