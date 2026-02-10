@@ -5,6 +5,7 @@ namespace App\Modules\Inventory\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Modules\Inventory\Models\Inventory;
 use App\Modules\Inventory\Models\Warehouse;
+use App\Modules\Inventory\Services\InventoryService;
 use App\Modules\Product\Models\Product;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -85,5 +86,76 @@ class InventoryController extends Controller
             'inventories' => $inventories,
             'alerts' => $criticalAlerts,
         ]);
+    }
+
+    public function adjust(Request $request, InventoryService $inventoryService)
+    {
+        $request->validate([
+            'warehouse_id' => 'required|exists:warehouses,id',
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:0',
+            'type' => 'required|in:add,remove,set',
+            'reason' => 'required|string|max:255',
+        ]);
+
+        try {
+            switch ($request->type) {
+                case 'add':
+                    $inventoryService->addStock(
+                        $request->warehouse_id,
+                        $request->product_id,
+                        $request->quantity,
+                        $request->reason,
+                        auth()->id()
+                    );
+                    break;
+                case 'remove':
+                    $inventoryService->removeStock(
+                        $request->warehouse_id,
+                        $request->product_id,
+                        $request->quantity,
+                        $request->reason,
+                        auth()->id()
+                    );
+                    break;
+                case 'set':
+                    $inventoryService->setStock(
+                        $request->warehouse_id,
+                        $request->product_id,
+                        $request->quantity,
+                        $request->reason,
+                        auth()->id()
+                    );
+                    break;
+            }
+
+            return back()->with('success', 'Stock adjusted successfully.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    public function transfer(Request $request, InventoryService $inventoryService)
+    {
+        $request->validate([
+            'source_warehouse_id' => 'required|exists:warehouses,id',
+            'target_warehouse_id' => 'required|exists:warehouses,id|different:source_warehouse_id',
+            'product_id' => 'required|exists:products,id',
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        try {
+            $inventoryService->transferStock(
+                $request->source_warehouse_id,
+                $request->target_warehouse_id,
+                $request->product_id,
+                $request->quantity,
+                auth()->id()
+            );
+
+            return back()->with('success', 'Stock transferred successfully.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
     }
 }

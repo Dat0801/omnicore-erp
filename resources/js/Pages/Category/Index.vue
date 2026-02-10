@@ -131,7 +131,7 @@ const statusLabel = (category) => (category.is_active ? 'Active' : 'Inactive');
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-right text-sm font-semibold">
-                                    <Link href="#" class="text-blue-600 hover:text-blue-700">View Products</Link>
+                                    <Link :href="route('admin.categories.edit', category.id)" class="text-blue-600 hover:text-blue-700">Edit</Link>
                                 </td>
                             </tr>
                             <tr v-if="categories.data.length === 0">

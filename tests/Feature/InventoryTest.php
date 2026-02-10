@@ -28,7 +28,7 @@ class InventoryTest extends TestCase
         $category = ProductCategory::create(['name' => 'Test Cat', 'slug' => 'test-cat']);
         $product = Product::create([
             'name' => 'Test Product',
-            'code' => 'TEST-SKU',
+            'sku' => 'TEST-SKU',
             'price' => 100,
             'product_category_id' => $category->id,
         ]);
@@ -54,7 +54,7 @@ class InventoryTest extends TestCase
         $category = ProductCategory::create(['name' => 'Test Cat', 'slug' => 'test-cat']);
         $product = Product::create([
             'name' => 'Test Product',
-            'code' => 'TEST-SKU',
+            'sku' => 'TEST-SKU',
             'price' => 100,
             'product_category_id' => $category->id,
         ]);
@@ -81,7 +81,7 @@ class InventoryTest extends TestCase
         $category = ProductCategory::create(['name' => 'Test Cat', 'slug' => 'test-cat']);
         $product = Product::create([
             'name' => 'Test Product',
-            'code' => 'TEST-SKU',
+            'sku' => 'TEST-SKU',
             'price' => 100,
             'product_category_id' => $category->id,
         ]);
@@ -101,7 +101,7 @@ class InventoryTest extends TestCase
         $category = ProductCategory::create(['name' => 'Test Cat', 'slug' => 'test-cat']);
         $product = Product::create([
             'name' => 'Test Product',
-            'code' => 'TEST-SKU',
+            'sku' => 'TEST-SKU',
             'price' => 100,
             'product_category_id' => $category->id,
         ]);

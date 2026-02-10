@@ -1,22 +1,32 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import axios from 'axios';
 
 const props = defineProps({
+    category: {
+        type: Object,
+        required: true,
+    },
     parentCategories: {
+        type: Array,
+        default: () => [],
+    },
+    products: {
         type: Array,
         default: () => [],
     },
 });
 
 const form = useForm({
-    name: '',
-    parent_id: '',
-    description: '',
-    display_order: 0,
-    is_active: true,
-    is_featured: false,
+    _method: 'PUT',
+    name: props.category.name,
+    parent_id: props.category.parent_id || '',
+    description: props.category.description || '',
+    display_order: props.category.display_order,
+    is_active: Boolean(props.category.is_active),
+    is_featured: Boolean(props.category.is_featured),
     icon: null,
 });
 
@@ -30,26 +40,68 @@ const handleIconUpload = (event) => {
     }
 };
 
-const submit = () => {
-    form.post(route('admin.categories.store'), {
+const searchQuery = ref('');
+const searchResults = ref([]);
+const isSearching = ref(false);
+
+const performSearch = async () => {
+    if (searchQuery.value.length < 2) {
+        searchResults.value = [];
+        return;
+    }
+    isSearching.value = true;
+    try {
+        const response = await axios.get(route('admin.products.search', { query: searchQuery.value }));
+        searchResults.value = response.data;
+    } catch (error) {
+        console.error('Search failed', error);
+    } finally {
+        isSearching.value = false;
+    }
+};
+
+const assignProduct = (product) => {
+    router.post(route('admin.categories.products.assign', props.category.id), {
+        product_id: product.id
+    }, {
         preserveScroll: true,
-        onSuccess: () => form.reset(),
+        onSuccess: () => {
+            searchQuery.value = '';
+            searchResults.value = [];
+        }
     });
+};
+
+const unassignProduct = (product) => {
+    if (confirm('Remove product from this category?')) {
+        router.delete(route('admin.categories.products.unassign', [props.category.id, product.id]), {
+            preserveScroll: true,
+        });
+    }
+};
+
+const submit = () => {
+    form.post(route('admin.categories.update', props.category.id), {
+        preserveScroll: true,
+    });
+};
+
+const destroy = () => {
+    if (confirm('Are you sure you want to delete this category?')) {
+        router.delete(route('admin.categories.destroy', props.category.id));
+    }
 };
 </script>
 
 <template>
-    <Head title="Create New Category" />
+    <Head title="Edit Category" />
 
     <AdminLayout>
         <div class="space-y-6">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <div class="text-xs text-gray-500">Categories > Create New</div>
-                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Create New Category</h1>
-                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                        Define your catalog structure and manage product hierarchy.
-                    </p>
+                    <div class="text-xs text-gray-500">Categories > Edit</div>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Edit Category: {{ props.category.name }}</h1>
                 </div>
                 <div class="flex items-center gap-3">
                     <Link
@@ -60,11 +112,18 @@ const submit = () => {
                     </Link>
                     <button
                         type="button"
+                        @click="destroy"
+                        class="rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700"
+                    >
+                        Delete
+                    </button>
+                    <button
+                        type="button"
                         @click="submit"
                         :disabled="form.processing"
                         class="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:opacity-50"
                     >
-                        Save Category
+                        Update Category
                     </button>
                 </div>
             </div>
@@ -87,7 +146,6 @@ const submit = () => {
                                         id="category_name"
                                         v-model="form.name"
                                         type="text"
-                                        placeholder="e.g. Home Electronics"
                                         class="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                     />
                                     <div v-if="form.errors.name" class="mt-1 text-xs text-red-500">{{ form.errors.name }}</div>
@@ -119,7 +177,6 @@ const submit = () => {
                                     id="category_description"
                                     v-model="form.description"
                                     rows="4"
-                                    placeholder="Briefly describe what products belong in this category..."
                                     class="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                 ></textarea>
                                 <div v-if="form.errors.description" class="mt-1 text-xs text-red-500">{{ form.errors.description }}</div>
@@ -127,21 +184,83 @@ const submit = () => {
                         </div>
                     </div>
 
-                    <!-- Removed Static Assigned Products Section -->
+                    <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                        <h3 class="mb-6 flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white">
+                            <span class="flex h-6 w-6 items-center justify-center rounded-full bg-green-100 text-xs font-bold text-green-600">P</span>
+                            Assigned Products
+                        </h3>
+
+                        <div class="space-y-6">
+                            <!-- Product Search -->
+                            <div class="relative">
+                                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Add Product to Category</label>
+                                <div class="flex gap-2">
+                                    <input
+                                        type="text"
+                                        v-model="searchQuery"
+                                        @input="performSearch"
+                                        placeholder="Search products by name or SKU..."
+                                        class="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                    />
+                                </div>
+                                
+                                <!-- Search Results Dropdown -->
+                                <div v-if="searchResults.length > 0" class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                    <ul class="divide-y divide-gray-100">
+                                        <li 
+                                            v-for="product in searchResults" 
+                                            :key="product.id"
+                                            class="cursor-pointer px-4 py-2 hover:bg-gray-100"
+                                            @click="assignProduct(product)"
+                                        >
+                                            <div class="font-medium">{{ product.name }}</div>
+                                            <div class="text-xs text-gray-500">SKU: {{ product.sku }} | ${{ product.price }}</div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Products Table -->
+                            <div class="overflow-x-auto rounded-lg border border-gray-200">
+                                <table class="min-w-full divide-y divide-gray-200 bg-white text-sm">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left font-medium text-gray-900">Name</th>
+                                            <th class="px-4 py-3 text-left font-medium text-gray-900">SKU</th>
+                                            <th class="px-4 py-3 text-right font-medium text-gray-900">Price</th>
+                                            <th class="px-4 py-3 text-right font-medium text-gray-900">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200">
+                                        <tr v-for="product in props.products" :key="product.id">
+                                            <td class="px-4 py-3 text-gray-900">{{ product.name }}</td>
+                                            <td class="px-4 py-3 text-gray-500">{{ product.sku }}</td>
+                                            <td class="px-4 py-3 text-right text-gray-900">${{ product.price }}</td>
+                                            <td class="px-4 py-3 text-right">
+                                                <button 
+                                                    @click="unassignProduct(product)"
+                                                    type="button"
+                                                    class="text-red-600 hover:text-red-900"
+                                                >
+                                                    Remove
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr v-if="props.products.length === 0">
+                                            <td colspan="4" class="px-4 py-8 text-center text-gray-500">
+                                                No products assigned to this category.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="space-y-6">
                     <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                         <h3 class="mb-4 flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white">
-                            <span class="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-                                <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path
-                                        fill-rule="evenodd"
-                                        d="M11 3a1 1 0 10-2 0v1.382a1 1 0 00.553.894l4 2a1 1 0 00.894-1.788L11 3.882V3zM5 7a3 3 0 00-3 3v4a3 3 0 003 3h10a3 3 0 003-3v-4a3 3 0 00-3-3H5zm3.5 3a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"
-                                        clip-rule="evenodd"
-                                    />
-                                </svg>
-                            </span>
                             Display & Ranking
                         </h3>
 
@@ -156,7 +275,6 @@ const submit = () => {
                                     type="number"
                                     class="w-full rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                 />
-                                <p class="mt-1 text-xs text-gray-400">Lower numbers appear first in lists.</p>
                                 <div v-if="form.errors.display_order" class="mt-1 text-xs text-red-500">{{ form.errors.display_order }}</div>
                             </div>
 
@@ -164,7 +282,6 @@ const submit = () => {
                                 <input id="is_active" v-model="form.is_active" type="checkbox" class="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
                                 <div>
                                     <label class="text-sm font-semibold text-gray-700 dark:text-gray-200" for="is_active">Active Category</label>
-                                    <p class="text-xs text-gray-500">If disabled, this category and its products will be hidden.</p>
                                 </div>
                             </div>
 
@@ -172,7 +289,6 @@ const submit = () => {
                                 <input id="is_featured" v-model="form.is_featured" type="checkbox" class="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
                                 <div>
                                     <label class="text-sm font-semibold text-gray-700 dark:text-gray-200" for="is_featured">Featured Category</label>
-                                    <p class="text-xs text-gray-500">Highlight this category on the homepage dashboard.</p>
                                 </div>
                             </div>
                         </div>
@@ -180,6 +296,9 @@ const submit = () => {
 
                     <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                         <h3 class="mb-4 text-sm font-semibold text-gray-900 dark:text-white">Category Icon</h3>
+                        <div v-if="props.category.icon" class="mb-4 flex justify-center">
+                            <img :src="props.category.icon" alt="Current Icon" class="h-20 w-20 object-contain" />
+                        </div>
                         <div class="relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 px-6 py-8 text-center text-sm text-gray-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300">
                             <input
                                 type="file"
@@ -190,16 +309,10 @@ const submit = () => {
                             <svg class="mb-2 h-6 w-6 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12 2a2 2 0 012 2v1h4a2 2 0 012 2v10a2 2 0 01-2 2h-4v1a2 2 0 01-4 0v-1H6a2 2 0 01-2-2V7a2 2 0 012-2h4V4a2 2 0 012-2zm-3 7a2 2 0 100 4 2 2 0 000-4z" />
                             </svg>
-                            <p class="font-medium text-gray-700 dark:text-gray-200">Click to upload</p>
-                            <p class="text-xs">SVG, PNG, JPG (max 2MB)</p>
+                            <p class="font-medium text-gray-700 dark:text-gray-200">Click to upload new icon</p>
                             <p v-if="iconFileName" class="mt-2 text-xs font-semibold text-blue-600">{{ iconFileName }}</p>
                             <div v-if="form.errors.icon" class="mt-1 text-xs text-red-500">{{ form.errors.icon }}</div>
                         </div>
-                    </div>
-
-                    <div class="rounded-xl border border-blue-100 bg-blue-50 p-5 text-xs text-blue-600">
-                        <h4 class="text-sm font-semibold text-blue-800">Internal Note</h4>
-                        <p class="mt-2">Categories are cached globally. Changes may take up to 5 minutes to reflect on the customer-facing portal.</p>
                     </div>
                 </div>
             </div>
@@ -217,7 +330,7 @@ const submit = () => {
                     :disabled="form.processing"
                     class="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 sm:w-auto disabled:opacity-50"
                 >
-                    Create Category
+                    Update Category
                 </button>
             </div>
         </div>

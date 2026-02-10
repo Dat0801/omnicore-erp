@@ -4,8 +4,8 @@ namespace Database\Seeders;
 
 use App\Enums\Role;
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,18 +15,26 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Admin User
-        User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@omnicore.app',
-            'role' => Role::ADMIN,
-        ]);
+        User::firstOrCreate(
+            ['email' => 'admin@omnicore.app'],
+            [
+                'name' => 'Admin User',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+                'role' => Role::ADMIN,
+            ]
+        );
 
         // Staff User
-        User::factory()->create([
-            'name' => 'Staff User',
-            'email' => 'staff@omnicore.app',
-            'role' => Role::STAFF,
-        ]);
+        User::firstOrCreate(
+            ['email' => 'staff@omnicore.app'],
+            [
+                'name' => 'Staff User',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+                'role' => Role::STAFF,
+            ]
+        );
 
         $this->call([
             ProductSeeder::class,

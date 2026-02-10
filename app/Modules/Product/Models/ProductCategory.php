@@ -6,14 +6,32 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Database\Factories\ProductCategoryFactory;
 
 class ProductCategory extends Model
 {
     use HasFactory;
 
+    protected static function newFactory()
+    {
+        return ProductCategoryFactory::new();
+    }
+
     protected $fillable = [
         'name',
+        'slug',
         'parent_id',
+        'description',
+        'icon',
+        'display_order',
+        'is_active',
+        'is_featured',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+        'is_featured' => 'boolean',
+        'display_order' => 'integer',
     ];
 
     public function products(): HasMany

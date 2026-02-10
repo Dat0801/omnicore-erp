@@ -15,13 +15,18 @@ class ProductRepository
 
     public function getPaginated(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = Product::with(['category', 'images'])->latest();
+        $query = Product::with(['category', 'images', 'variants'])
+            ->withSum('inventories', 'quantity')
+            ->withSum('variantsInventories', 'quantity')
+            ->whereNull('parent_id') // Only show parent products
+            ->latest();
 
         if (isset($filters['search']) && $filters['search']) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('code', 'like', "%{$search}%")
+                    ->orWhere('sku', 'like', "%{$search}%")
+                    ->orWhere('barcode', 'like', "%{$search}%")
                     ->orWhereHas('category', function ($q) use ($search) {
                         $q->where('name', 'like', "%{$search}%");
                     });
@@ -41,7 +46,7 @@ class ProductRepository
 
     public function findById(int $id): ?Product
     {
-        return Product::with(['category', 'images'])->find($id);
+        return Product::with(['category', 'images', 'variants.images', 'variants.inventories'])->find($id);
     }
 
     public function create(array $data): Product

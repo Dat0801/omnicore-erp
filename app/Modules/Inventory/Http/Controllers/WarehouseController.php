@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Modules\Inventory\Models\Inventory;
 use App\Modules\Inventory\Models\StockMovement;
 use App\Modules\Inventory\Models\Warehouse;
+use App\Modules\Inventory\Http\Requests\StoreWarehouseRequest;
+use App\Modules\Inventory\Http\Requests\UpdateWarehouseRequest;
 use App\Modules\Product\Models\ProductCategory;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -182,5 +184,45 @@ class WarehouseController extends Controller
                 'outgoingToday' => $outgoingToday,
             ],
         ]);
+    }
+
+    public function create(): Response
+    {
+        return Inertia::render('Warehouse/Create');
+    }
+
+    public function store(StoreWarehouseRequest $request)
+    {
+        Warehouse::create($request->validated());
+
+        return redirect()->route('admin.warehouses.index')
+            ->with('success', 'Warehouse created successfully.');
+    }
+
+    public function edit(Warehouse $warehouse): Response
+    {
+        return Inertia::render('Warehouse/Edit', [
+            'warehouse' => $warehouse,
+        ]);
+    }
+
+    public function update(UpdateWarehouseRequest $request, Warehouse $warehouse)
+    {
+        $warehouse->update($request->validated());
+
+        return redirect()->route('admin.warehouses.index')
+            ->with('success', 'Warehouse updated successfully.');
+    }
+
+    public function destroy(Warehouse $warehouse)
+    {
+        if ($warehouse->inventories()->exists()) {
+            return back()->withErrors(['error' => 'Cannot delete warehouse with existing inventory. Please clear inventory first.']);
+        }
+
+        $warehouse->delete();
+
+        return redirect()->route('admin.warehouses.index')
+            ->with('success', 'Warehouse deleted successfully.');
     }
 }

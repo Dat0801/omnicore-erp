@@ -11,23 +11,40 @@ class InventorySeeder extends Seeder
 {
     public function run(): void
     {
-        $warehouse = Warehouse::create([
-            'name' => 'Main Warehouse',
-            'code' => 'WH-MAIN',
-            'address' => '123 Main St, City',
-            'is_active' => true,
-        ]);
+        $warehouse = Warehouse::firstOrCreate(
+            ['code' => 'WH-MAIN'],
+            [
+                'name' => 'Main Warehouse',
+                'address' => '123 Main St, City',
+                'is_active' => true,
+            ]
+        );
 
         $service = app(InventoryService::class);
 
-        $phone = Product::where('code', 'PHONE-X-001')->first();
-        if ($phone) {
-            $service->addStock($warehouse->id, $phone->id, 10, 'Initial stock', null);
-        }
+        // Seed some stock for the new products
+        $productsToSeed = [
+            'ELEC-PHONE-15PRO' => 50,
+            'CLOTH-TSHIRT-BLK-L' => 200,
+            'HOME-CHAIR-ERGO' => 15,
+            'BEAUTY-CREAM-FACE' => 100,
+            'SPORT-DUMBBELL-5KG' => 30,
+        ];
 
-        $shirt = Product::where('code', 'TSHIRT-001')->first();
-        if ($shirt) {
-            $service->addStock($warehouse->id, $shirt->id, 50, 'Initial stock', null);
+        foreach ($productsToSeed as $sku => $qty) {
+            $product = Product::where('sku', $sku)->first();
+            if ($product) {
+                // Check if stock already exists to prevent duplicate seeding (optional but good for idempotency)
+                // However, InventoryService::addStock adds to existing. 
+                // We might want to "set" stock or check if inventory record exists.
+                // For simplicity in seeder, we can check if inventory exists for this product+warehouse
+                
+                $exists = $product->inventories()->where('warehouse_id', $warehouse->id)->exists();
+                
+                if (!$exists) {
+                     $service->addStock($warehouse->id, $product->id, $qty, 'Initial stock seeding', null);
+                }
+            }
         }
     }
 }

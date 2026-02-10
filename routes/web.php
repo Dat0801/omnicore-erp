@@ -26,15 +26,20 @@ Route::middleware('auth')->group(function () {
 
     // Admin Routes
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
+        Route::get('products/search', [ProductController::class, 'search'])->name('products.search');
         Route::resource('products', ProductController::class);
-        Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
-        Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+        
+        Route::post('categories/{category}/products', [CategoryController::class, 'assignProduct'])->name('categories.products.assign');
+        Route::delete('categories/{category}/products/{product}', [CategoryController::class, 'unassignProduct'])->name('categories.products.unassign');
+        Route::resource('categories', CategoryController::class);
+        
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
         Route::get('/roles/{role}/permissions', [RoleController::class, 'editPermissions'])->name('roles.permissions.edit');
         Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
-        Route::get('/warehouses', [WarehouseController::class, 'index'])->name('warehouses.index');
-        Route::get('/warehouses/{warehouse}', [WarehouseController::class, 'show'])->name('warehouses.show');
+        Route::post('/inventory/adjust', [InventoryController::class, 'adjust'])->name('inventory.adjust');
+        Route::post('/inventory/transfer', [InventoryController::class, 'transfer'])->name('inventory.transfer');
+        Route::resource('warehouses', WarehouseController::class);
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     });
 });
