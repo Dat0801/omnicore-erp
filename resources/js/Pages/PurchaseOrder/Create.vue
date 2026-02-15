@@ -82,26 +82,16 @@ watch(searchQuery, () => {
     searchTimer = setTimeout(searchProducts, 250);
 });
 
-const submitPo = async () => {
+const submitPo = () => {
     if (!form.supplier_id || !form.warehouse_id || form.items.length === 0) {
         return;
     }
-    const payload = {
-        supplier_id: form.supplier_id,
-        warehouse_id: form.warehouse_id,
-        expected_at: form.expected_at,
-        items: form.items.map((i) => ({
-            product_id: i.product_id,
-            quantity: i.quantity,
-            price: i.price,
-        })),
-    };
-    try {
-        await window.axios.post('/api/purchase-orders', payload);
-        window.location = route('admin.purchase-orders.index');
-    } catch (e) {
-        //
-    }
+
+    form.post(route('admin.purchase-orders.store'), {
+        onSuccess: () => {
+            window.location = route('admin.purchase-orders.index');
+        },
+    });
 };
 </script>
 
@@ -293,4 +283,3 @@ const submitPo = async () => {
         </div>
     </AdminLayout>
     </template>
-

@@ -6,12 +6,18 @@ use App\Http\Controllers\Controller;
 use App\Modules\Inventory\Models\Warehouse;
 use App\Modules\Purchasing\Models\PurchaseOrder;
 use App\Modules\Purchasing\Models\Supplier;
+use App\Modules\Purchasing\Services\PurchaseOrderService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class PurchaseOrderController extends Controller
 {
+    public function __construct(
+        protected PurchaseOrderService $service,
+    ) {}
+
     public function index(Request $request)
     {
         $status = $request->string('status')->toString() ?: 'all';
@@ -58,6 +64,26 @@ class PurchaseOrderController extends Controller
         ]);
     }
 
+    public function show(PurchaseOrder $purchaseOrder)
+    {
+        $purchaseOrder->load([
+            'supplier',
+            'warehouse',
+            'items.product',
+        ]);
+
+        $metrics = [
+            'totalItems' => $purchaseOrder->items->count(),
+            'totalQuantity' => (int) $purchaseOrder->items->sum('quantity'),
+            'totalAmount' => (float) $purchaseOrder->total_amount,
+        ];
+
+        return Inertia::render('PurchaseOrder/Show', [
+            'purchaseOrder' => $purchaseOrder,
+            'metrics' => $metrics,
+        ]);
+    }
+
     public function create()
     {
         $suppliers = Supplier::where('is_active', true)
@@ -72,5 +98,33 @@ class PurchaseOrderController extends Controller
             'suppliers' => $suppliers,
             'warehouses' => $warehouses,
         ]);
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'supplier_id' => 'required|exists:suppliers,id',
+            'warehouse_id' => 'required|exists:warehouses,id',
+            'expected_at' => 'nullable|date',
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.price' => 'required|numeric|min:0',
+        ]);
+
+        $this->service->create($validated);
+
+        return redirect()
+            ->route('admin.purchase-orders.index')
+            ->with('success', 'Purchase order created successfully.');
+    }
+
+    public function receive(PurchaseOrder $purchaseOrder): RedirectResponse
+    {
+        $this->service->receive($purchaseOrder);
+
+        return redirect()
+            ->route('admin.purchase-orders.index', ['status' => 'received'])
+            ->with('success', 'Purchase order marked as received and inventory updated.');
     }
 }

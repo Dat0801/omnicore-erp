@@ -46,6 +46,9 @@ Route::middleware('auth')->group(function () {
         Route::resource('suppliers', SupplierController::class)->only(['index', 'show', 'create', 'store']);
         Route::get('purchase-orders', [PoAdminController::class, 'index'])->name('purchase-orders.index');
         Route::get('purchase-orders/create', [PoAdminController::class, 'create'])->name('purchase-orders.create');
+        Route::get('purchase-orders/{purchaseOrder}', [PoAdminController::class, 'show'])->name('purchase-orders.show');
+        Route::post('purchase-orders', [PoAdminController::class, 'store'])->name('purchase-orders.store');
+        Route::post('purchase-orders/{purchaseOrder}/receive', [PoAdminController::class, 'receive'])->name('purchase-orders.receive');
     });
 });
 

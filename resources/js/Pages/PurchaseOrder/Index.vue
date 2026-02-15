@@ -79,7 +79,12 @@ watch(status, (v) => {
                         <tbody class="divide-y divide-gray-100">
                             <tr v-for="po in purchaseOrders.data" :key="po.id" class="transition hover:bg-gray-50">
                                 <td class="px-6 py-4">
-                                    <Link class="text-blue-600 font-semibold hover:underline" href="#!">#{{ po.code || ('PO-'+String(po.id).padStart(4,'0')) }}</Link>
+                                    <Link
+                                        class="text-blue-600 font-semibold hover:underline"
+                                        :href="route('admin.purchase-orders.show', po.id)"
+                                    >
+                                        #{{ po.code || ('PO-'+String(po.id).padStart(4,'0')) }}
+                                    </Link>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-700">{{ new Date(po.ordered_at || po.created_at).toLocaleDateString() }}</td>
                                 <td class="px-6 py-4 text-sm text-gray-900">{{ po.supplier?.name || '—' }}</td>
@@ -92,8 +97,21 @@ watch(status, (v) => {
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="inline-flex gap-2">
-                                        <button class="rounded-lg border border-gray-200 px-2.5 py-1 text-xs">View</button>
+                                        <Link
+                                            :href="route('admin.purchase-orders.show', po.id)"
+                                            class="rounded-lg border border-gray-200 px-2.5 py-1 text-xs text-gray-700 hover:bg-gray-50"
+                                        >
+                                            View
+                                        </Link>
                                         <button class="rounded-lg border border-gray-200 px-2.5 py-1 text-xs">Print</button>
+                                        <button
+                                            v-if="po.status === 'ordered'"
+                                            type="button"
+                                            class="rounded-lg bg-emerald-600 px-2.5 py-1 text-xs font-semibold text-white hover:bg-emerald-700"
+                                            @click="router.post(route('admin.purchase-orders.receive', po.id))"
+                                        >
+                                            Mark as Received
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -129,4 +147,3 @@ watch(status, (v) => {
         </div>
     </AdminLayout>
 </template>
-
