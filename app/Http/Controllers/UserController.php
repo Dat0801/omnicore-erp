@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreUserRequest;
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
+use Inertia\Response;
 use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): Response
     {
         $query = User::query();
 
@@ -51,5 +55,37 @@ class UserController extends Controller
                 'label' => ucfirst($r->name),
             ]),
         ]);
+    }
+
+    public function create(): Response
+    {
+        $roles = Role::query()->orderBy('name')->get()->map(fn ($r) => [
+            'value' => $r->name,
+            'label' => ucfirst($r->name),
+        ]);
+
+        return Inertia::render('User/Create', [
+            'roles' => $roles,
+        ]);
+    }
+
+    public function store(StoreUserRequest $request): RedirectResponse
+    {
+        $data = $request->validated();
+
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+            'role' => $data['role'],
+            'is_active' => $data['is_active'] ?? true,
+        ]);
+
+        Role::firstOrCreate(['name' => $data['role'], 'guard_name' => 'web']);
+        $user->syncRoles([$data['role']]);
+
+        return redirect()
+            ->route('admin.users.index')
+            ->with('success', 'User created successfully.');
     }
 }

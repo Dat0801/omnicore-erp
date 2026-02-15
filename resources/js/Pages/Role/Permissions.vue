@@ -1,11 +1,13 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 const props = defineProps({
     role: Object,
+    actions: Array,
+    matrix: Array,
 });
 
 const roleName = ref(props.role?.label ?? '');
@@ -14,52 +16,62 @@ const isActive = ref(true);
 const restrictAdminAccess = ref(true);
 const dataExportRights = ref(false);
 
-const columns = [
-    { key: 'view', label: 'View' },
-    { key: 'create', label: 'Create' },
-    { key: 'edit', label: 'Edit' },
-    { key: 'delete', label: 'Delete' },
-];
+const columns = computed(() => props.actions ?? []);
 
-const permissionRows = ref([
-    {
-        module: 'Product Management',
-        description: 'Catalog, Categories, Attributes',
-        permissions: { view: true, create: true, edit: true, delete: false },
-    },
-    {
-        module: 'Warehouse Logs',
-        description: 'Stock In/Out, Locations',
-        permissions: { view: true, create: true, edit: true, delete: true },
-    },
-    {
-        module: 'Order Fulfillment',
-        description: 'Picking, Packing, Shipping',
-        permissions: { view: true, create: false, edit: true, delete: false },
-    },
-    {
-        module: 'Inventory Audits',
-        description: 'Cycle Counting, Discrepancies',
-        permissions: { view: true, create: true, edit: false, delete: false },
-    },
-    {
-        module: 'Reporting',
-        description: 'Analytics, Stock Turnover',
-        permissions: { view: true, create: false, edit: false, delete: false },
-    },
-    {
-        module: 'Supplier Management',
-        description: 'Vendors, Purchase Orders',
-        permissions: { view: true, create: false, edit: false, delete: false },
-    },
-]);
+const permissionRows = ref(
+    (props.matrix ?? []).map((row) => {
+        const permissions = {};
+
+        (row.permissions ?? []).forEach((permission) => {
+            permissions[permission.key] = {
+                id: permission.id,
+                checked: permission.assigned,
+            };
+        });
+
+        return {
+            moduleKey: row.module,
+            module: row.label ?? row.module,
+            description: row.description ?? '',
+            permissions,
+        };
+    }),
+);
+
+const form = useForm({
+    permissions: [],
+});
 
 const setAllPermissions = (value) => {
     permissionRows.value.forEach((row) => {
-        columns.forEach((column) => {
-            row.permissions[column.key] = value;
+        columns.value.forEach((column) => {
+            const permission = row.permissions[column.key];
+
+            if (permission && permission.id) {
+                permission.checked = value;
+            }
         });
     });
+};
+
+const collectSelectedPermissionIds = () => {
+    const selected = [];
+
+    permissionRows.value.forEach((row) => {
+        Object.values(row.permissions).forEach((permission) => {
+            if (permission.id && permission.checked) {
+                selected.push(permission.id);
+            }
+        });
+    });
+
+    return selected;
+};
+
+const submit = () => {
+    form.permissions = collectSelectedPermissionIds();
+
+    form.put(route('admin.roles.permissions.update', props.role.value));
 };
 
 const roleInitials = computed(() => {
@@ -100,7 +112,7 @@ const roleInitials = computed(() => {
                         <button class="inline-flex items-center rounded-md border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-600 shadow-sm transition hover:bg-slate-50">
                             Cancel
                         </button>
-                        <PrimaryButton>
+                        <PrimaryButton @click="submit" :disabled="form.processing">
                             <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7v14" />
                             </svg>
@@ -208,16 +220,33 @@ const roleInitials = computed(() => {
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-slate-100">
-                                    <tr v-for="row in permissionRows" :key="row.module" class="hover:bg-slate-50/70">
+                                    <tr
+                                        v-for="row in permissionRows"
+                                        :key="row.moduleKey"
+                                        class="hover:bg-slate-50/70"
+                                    >
                                         <td class="px-6 py-4">
-                                            <p class="text-sm font-semibold text-slate-900">{{ row.module }}</p>
-                                            <p class="text-xs text-slate-400">{{ row.description }}</p>
+                                            <p class="text-sm font-semibold text-slate-900">
+                                                {{ row.module }}
+                                            </p>
+                                            <p class="text-xs text-slate-400">
+                                                {{ row.description }}
+                                            </p>
                                         </td>
-                                        <td v-for="column in columns" :key="column.key" class="px-4 py-4 text-center">
+                                        <td
+                                            v-for="column in columns"
+                                            :key="column.key"
+                                            class="px-4 py-4 text-center"
+                                        >
                                             <input
-                                                v-model="row.permissions[column.key]"
+                                                v-if="row.permissions[column.key]?.id"
+                                                v-model="row.permissions[column.key].checked"
                                                 type="checkbox"
                                                 class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                            />
+                                            <span
+                                                v-else
+                                                class="inline-block h-4 w-4 rounded border border-dashed border-slate-200 bg-slate-50"
                                             />
                                         </td>
                                     </tr>

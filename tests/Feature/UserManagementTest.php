@@ -6,6 +6,7 @@ use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
+use Spatie\Permission\Models\Role as SpatieRole;
 use Tests\TestCase;
 
 class UserManagementTest extends TestCase
@@ -92,5 +93,34 @@ class UserManagementTest extends TestCase
                 ->where('stats.managers', 2)
                 ->where('stats.staff', 3)
             );
+    }
+
+    public function test_admin_can_create_user_with_role(): void
+    {
+        $admin = User::factory()->create(['role' => Role::ADMIN]);
+
+        SpatieRole::firstOrCreate(['name' => 'staff', 'guard_name' => 'web']);
+
+        $response = $this->actingAs($admin)
+            ->post(route('admin.users.store'), [
+                'name' => 'New Staff',
+                'email' => 'new.staff@example.com',
+                'password' => 'password123',
+                'password_confirmation' => 'password123',
+                'role' => Role::STAFF->value,
+                'is_active' => true,
+            ]);
+
+        $response->assertRedirect(route('admin.users.index'));
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'new.staff@example.com',
+            'role' => Role::STAFF->value,
+            'is_active' => true,
+        ]);
+
+        $user = User::where('email', 'new.staff@example.com')->first();
+        $this->assertNotNull($user);
+        $this->assertTrue($user->hasRole(Role::STAFF->value));
     }
 }
