@@ -25,6 +25,7 @@ class ProductCategoryFactory extends Factory
     public function definition(): array
     {
         $name = ucfirst($this->faker->unique()->words(2, true));
+
         return [
             'name' => $name,
             'slug' => \Illuminate\Support\Str::slug($name),

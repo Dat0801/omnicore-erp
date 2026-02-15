@@ -4,11 +4,11 @@ namespace App\Modules\Inventory\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Modules\Inventory\Http\Requests\StoreWarehouseRequest;
+use App\Modules\Inventory\Http\Requests\UpdateWarehouseRequest;
 use App\Modules\Inventory\Models\Inventory;
 use App\Modules\Inventory\Models\StockMovement;
 use App\Modules\Inventory\Models\Warehouse;
-use App\Modules\Inventory\Http\Requests\StoreWarehouseRequest;
-use App\Modules\Inventory\Http\Requests\UpdateWarehouseRequest;
 use App\Modules\Product\Models\ProductCategory;
 use Illuminate\Http\Request;
 use Inertia\Inertia;

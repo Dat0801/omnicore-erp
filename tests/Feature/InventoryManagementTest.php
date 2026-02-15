@@ -16,15 +16,17 @@ class InventoryManagementTest extends TestCase
     use RefreshDatabase;
 
     protected User $admin;
+
     protected Warehouse $warehouse;
+
     protected Product $product;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->admin = User::factory()->create(['role' => Role::ADMIN]);
-        
+
         $this->warehouse = Warehouse::create(['name' => 'Main', 'code' => 'MAIN']);
         $category = ProductCategory::create(['name' => 'Test Cat', 'slug' => 'test-cat']);
         $this->product = Product::create([
@@ -106,7 +108,7 @@ class InventoryManagementTest extends TestCase
     public function test_can_transfer_stock()
     {
         $targetWarehouse = Warehouse::create(['name' => 'Secondary', 'code' => 'SEC']);
-        
+
         // Setup initial stock
         Inventory::create([
             'warehouse_id' => $this->warehouse->id,
@@ -122,7 +124,7 @@ class InventoryManagementTest extends TestCase
         ]);
 
         $response->assertSessionHas('success');
-        
+
         $this->assertDatabaseHas('inventories', [
             'warehouse_id' => $this->warehouse->id,
             'product_id' => $this->product->id,

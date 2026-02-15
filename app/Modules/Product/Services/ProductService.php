@@ -2,11 +2,11 @@
 
 namespace App\Modules\Product\Services;
 
+use App\Modules\Inventory\Models\Inventory;
+use App\Modules\Inventory\Models\Warehouse;
+use App\Modules\Inventory\Services\InventoryService;
 use App\Modules\Product\Models\Product;
 use App\Modules\Product\Repositories\ProductRepository;
-use App\Modules\Inventory\Services\InventoryService;
-use App\Modules\Inventory\Models\Warehouse;
-use App\Modules\Inventory\Models\Inventory;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -43,14 +43,14 @@ class ProductService
             }
 
             // Handle Variants
-            if (!empty($data['has_variants']) && !empty($data['variants'])) {
-                 foreach ($data['variants'] as $variantData) {
-                     $this->createVariant($product, $variantData);
-                 }
+            if (! empty($data['has_variants']) && ! empty($data['variants'])) {
+                foreach ($data['variants'] as $variantData) {
+                    $this->createVariant($product, $variantData);
+                }
             } else {
                 // Handle Inventory for single product
-                $quantity = isset($data['quantity']) ? (int)$data['quantity'] : 0;
-                $lowStockThreshold = isset($data['low_stock_threshold']) ? (int)$data['low_stock_threshold'] : 0;
+                $quantity = isset($data['quantity']) ? (int) $data['quantity'] : 0;
+                $lowStockThreshold = isset($data['low_stock_threshold']) ? (int) $data['low_stock_threshold'] : 0;
                 $this->handleInventory($product, $quantity, $lowStockThreshold);
             }
 
@@ -63,25 +63,25 @@ class ProductService
         $data['parent_id'] = $parent->id;
         // Generate name if not provided
         if (empty($data['name'])) {
-            $data['name'] = $parent->name . ' - ' . implode(' ', array_values($data['variant_attributes']));
+            $data['name'] = $parent->name.' - '.implode(' ', array_values($data['variant_attributes']));
         }
         $data['type'] = $parent->type;
         $data['product_category_id'] = $parent->product_category_id;
         $data['unit'] = $parent->unit;
-        
+
         // Ensure variant attributes are set
-        if (!isset($data['variant_attributes'])) {
+        if (! isset($data['variant_attributes'])) {
             $data['variant_attributes'] = [];
         }
 
         $variant = $this->repository->create($data);
-        
+
         // Handle inventory for variant
-        $quantity = isset($data['quantity']) ? (int)$data['quantity'] : 0;
-        $lowStockThreshold = isset($data['low_stock_threshold']) ? (int)$data['low_stock_threshold'] : 0;
-        
+        $quantity = isset($data['quantity']) ? (int) $data['quantity'] : 0;
+        $lowStockThreshold = isset($data['low_stock_threshold']) ? (int) $data['low_stock_threshold'] : 0;
+
         $this->handleInventory($variant, $quantity, $lowStockThreshold);
-        
+
         return $variant;
     }
 
@@ -103,12 +103,12 @@ class ProductService
                     auth()->id()
                 );
             }
-            
+
             if ($lowStockThreshold > 0) {
-                 Inventory::updateOrCreate(
-                     ['warehouse_id' => $warehouse->id, 'product_id' => $product->id],
-                     ['reorder_level' => $lowStockThreshold]
-                 );
+                Inventory::updateOrCreate(
+                    ['warehouse_id' => $warehouse->id, 'product_id' => $product->id],
+                    ['reorder_level' => $lowStockThreshold]
+                );
             }
         }
     }
@@ -129,13 +129,13 @@ class ProductService
 
             // Handle Low Stock Threshold Update
             if (isset($data['low_stock_threshold'])) {
-                 $warehouse = Warehouse::where('code', 'DEFAULT')->first();
-                 if ($warehouse) {
-                     Inventory::updateOrCreate(
-                         ['warehouse_id' => $warehouse->id, 'product_id' => $product->id],
-                         ['reorder_level' => (int)$data['low_stock_threshold']]
-                     );
-                 }
+                $warehouse = Warehouse::where('code', 'DEFAULT')->first();
+                if ($warehouse) {
+                    Inventory::updateOrCreate(
+                        ['warehouse_id' => $warehouse->id, 'product_id' => $product->id],
+                        ['reorder_level' => (int) $data['low_stock_threshold']]
+                    );
+                }
             }
 
             // Handle Variants
@@ -159,22 +159,22 @@ class ProductService
                 // Update existing variant
                 $variant = $this->repository->findById($variantData['id']);
                 $updateData = collect($variantData)->only(['sku', 'price', 'variant_attributes', 'is_active'])->toArray();
-                
+
                 // Update name if attributes changed
                 if (isset($updateData['variant_attributes'])) {
-                    $updateData['name'] = $parent->name . ' - ' . implode(' ', array_values($updateData['variant_attributes']));
+                    $updateData['name'] = $parent->name.' - '.implode(' ', array_values($updateData['variant_attributes']));
                 }
 
                 $this->repository->update($variant, $updateData);
                 $processedIds[] = $variant->id;
-                
+
                 // Handle inventory for variant if provided (only reorder level for now)
                 if (isset($variantData['low_stock_threshold'])) {
                     $warehouse = Warehouse::where('code', 'DEFAULT')->first();
                     if ($warehouse) {
                         Inventory::updateOrCreate(
                             ['warehouse_id' => $warehouse->id, 'product_id' => $variant->id],
-                            ['reorder_level' => (int)$variantData['low_stock_threshold']]
+                            ['reorder_level' => (int) $variantData['low_stock_threshold']]
                         );
                     }
                 }
@@ -186,7 +186,7 @@ class ProductService
 
         // Delete variants that were removed
         $toDelete = array_diff($existingIds, $processedIds);
-        if (!empty($toDelete)) {
+        if (! empty($toDelete)) {
             Product::whereIn('id', $toDelete)->delete();
         }
     }

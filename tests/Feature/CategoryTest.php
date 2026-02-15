@@ -169,7 +169,7 @@ class CategoryTest extends TestCase
         $this->assertDatabaseHas('product_categories', [
             'name' => 'Category with Icon',
         ]);
-        
+
         $category = ProductCategory::where('name', 'Category with Icon')->first();
         $this->assertNotNull($category->icon);
         Storage::disk('public')->assertExists(str_replace('/storage/', '', $category->icon));

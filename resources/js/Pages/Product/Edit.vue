@@ -54,9 +54,7 @@ const removeVariant = (index) => {
 };
 
 const submit = () => {
-    form.post(route('admin.products.update', props.product.id), {
-        _method: 'put',
-    });
+    form.put(route('admin.products.update', props.product.id));
 };
 
 const handleImageUpload = (e) => {

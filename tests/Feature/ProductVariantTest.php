@@ -3,9 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use App\Modules\Product\Models\Product;
 use App\Modules\Inventory\Models\Inventory;
-use App\Modules\Inventory\Models\Warehouse;
+use App\Modules\Product\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -48,12 +47,12 @@ class ProductVariantTest extends TestCase
             'sku' => 'TSHIRT-MAIN',
             'has_variants' => true,
         ]);
-        
+
         $parent = Product::where('sku', 'TSHIRT-MAIN')->first();
 
         // Assert Variants
         $this->assertCount(2, $parent->variants);
-        
+
         $this->assertDatabaseHas('products', [
             'parent_id' => $parent->id,
             'sku' => 'TSHIRT-RED-S',
@@ -158,11 +157,11 @@ class ProductVariantTest extends TestCase
             'id' => $variant2->id,
         ]);
     }
-    
+
     public function test_validation_requires_variants_if_has_variants_true()
     {
         $user = User::factory()->admin()->create();
-        
+
         $response = $this->actingAs($user)->post(route('admin.products.store'), [
             'name' => 'T-Shirt',
             'sku' => 'TSHIRT-FAIL',
@@ -170,7 +169,7 @@ class ProductVariantTest extends TestCase
             'has_variants' => true,
             'variants' => [], // Empty
         ]);
-        
+
         $response->assertSessionHasErrors('variants');
     }
 }

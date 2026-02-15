@@ -23,13 +23,13 @@ class ProductController extends Controller
     public function search(Request $request)
     {
         $query = $request->input('query');
-        
+
         $products = Product::query()
             ->where('name', 'like', "%{$query}%")
             ->orWhere('sku', 'like', "%{$query}%")
             ->limit(20)
             ->get(['id', 'name', 'sku', 'price', 'product_category_id']);
-            
+
         return response()->json($products);
     }
 
@@ -104,7 +104,7 @@ class ProductController extends Controller
 
         // Load inventory data for default warehouse
         $inventory = Inventory::where('product_id', $product->id)
-            ->whereHas('warehouse', function($q) {
+            ->whereHas('warehouse', function ($q) {
                 $q->where('code', 'DEFAULT');
             })->first();
 
@@ -115,7 +115,7 @@ class ProductController extends Controller
         if ($product->has_variants) {
             foreach ($product->variants as $variant) {
                 $variantInventory = Inventory::where('product_id', $variant->id)
-                    ->whereHas('warehouse', function($q) {
+                    ->whereHas('warehouse', function ($q) {
                         $q->where('code', 'DEFAULT');
                     })->first();
                 $variant->quantity = $variantInventory ? $variantInventory->quantity : 0;

@@ -28,11 +28,11 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
         Route::get('products/search', [ProductController::class, 'search'])->name('products.search');
         Route::resource('products', ProductController::class);
-        
+
         Route::post('categories/{category}/products', [CategoryController::class, 'assignProduct'])->name('categories.products.assign');
         Route::delete('categories/{category}/products/{product}', [CategoryController::class, 'unassignProduct'])->name('categories.products.unassign');
         Route::resource('categories', CategoryController::class);
-        
+
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
         Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
         Route::get('/roles/{role}/permissions', [RoleController::class, 'editPermissions'])->name('roles.permissions.edit');

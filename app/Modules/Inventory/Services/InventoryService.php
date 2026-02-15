@@ -53,7 +53,7 @@ class InventoryService
             } elseif ($diff < 0) {
                 return $this->removeStock($warehouseId, $productId, abs($diff), $reason, $userId);
             } else {
-                throw new Exception("New quantity matches current quantity.");
+                throw new Exception('New quantity matches current quantity.');
             }
         });
     }
@@ -64,32 +64,32 @@ class InventoryService
     public function transferStock(int $sourceWarehouseId, int $targetWarehouseId, int $productId, int $quantity, ?int $userId = null): array
     {
         return DB::transaction(function () use ($sourceWarehouseId, $targetWarehouseId, $productId, $quantity, $userId) {
-             $sourceWarehouse = Warehouse::findOrFail($sourceWarehouseId);
-             $targetWarehouse = Warehouse::findOrFail($targetWarehouseId);
+            $sourceWarehouse = Warehouse::findOrFail($sourceWarehouseId);
+            $targetWarehouse = Warehouse::findOrFail($targetWarehouseId);
 
-             if ($sourceWarehouseId === $targetWarehouseId) {
-                 throw new Exception("Source and target warehouses must be different.");
-             }
+            if ($sourceWarehouseId === $targetWarehouseId) {
+                throw new Exception('Source and target warehouses must be different.');
+            }
 
-             // Out from source
-             $outMovement = $this->removeStock(
-                 $sourceWarehouseId,
-                 $productId,
-                 $quantity,
-                 "Transfer to {$targetWarehouse->name} ({$targetWarehouse->code})",
-                 $userId
-             );
+            // Out from source
+            $outMovement = $this->removeStock(
+                $sourceWarehouseId,
+                $productId,
+                $quantity,
+                "Transfer to {$targetWarehouse->name} ({$targetWarehouse->code})",
+                $userId
+            );
 
-             // In to target
-             $inMovement = $this->addStock(
-                 $targetWarehouseId,
-                 $productId,
-                 $quantity,
-                 "Transfer from {$sourceWarehouse->name} ({$sourceWarehouse->code})",
-                 $userId
-             );
+            // In to target
+            $inMovement = $this->addStock(
+                $targetWarehouseId,
+                $productId,
+                $quantity,
+                "Transfer from {$sourceWarehouse->name} ({$sourceWarehouse->code})",
+                $userId
+            );
 
-             return ['out' => $outMovement, 'in' => $inMovement];
+            return ['out' => $outMovement, 'in' => $inMovement];
         });
     }
 

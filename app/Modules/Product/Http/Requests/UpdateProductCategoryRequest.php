@@ -3,7 +3,6 @@
 namespace App\Modules\Product\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class UpdateProductCategoryRequest extends FormRequest
 {

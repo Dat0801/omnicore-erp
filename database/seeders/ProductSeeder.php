@@ -28,7 +28,7 @@ class ProductSeeder extends Seeder
                 [
                     'slug' => Str::slug($name),
                     'description' => $description,
-                    'is_active' => true
+                    'is_active' => true,
                 ]
             );
             $categoryIds[$name] = $category->id;
@@ -82,7 +82,7 @@ class ProductSeeder extends Seeder
                 'tags' => ['audio', 'headphones', 'sony'],
                 'image' => 'https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?auto=format&fit=crop&q=80&w=800',
             ],
-            
+
             // Clothing
             [
                 'name' => 'Classic Cotton T-Shirt',
@@ -238,7 +238,7 @@ class ProductSeeder extends Seeder
                 'tags' => ['fitness', 'weights', 'gym'],
                 'image' => 'https://images.unsplash.com/photo-1638536532686-d610adfc8e5c?auto=format&fit=crop&q=80&w=800',
             ],
-             [
+            [
                 'name' => 'Protein Powder (Chocolate)',
                 'sku' => 'SPORT-PROTEIN-CHOC',
                 'barcode' => '700000000003',
@@ -282,7 +282,7 @@ class ProductSeeder extends Seeder
             );
         }
 
-        $this->command->info('Seeded ' . count($products) . ' real products successfully.');
+        $this->command->info('Seeded '.count($products).' real products successfully.');
 
         // Optional: Fill with random data only if strictly needed (e.g., performance testing)
         // But for "real data" requirement, usually curated is preferred.
