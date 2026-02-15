@@ -8,6 +8,7 @@ use App\Modules\Inventory\Http\Controllers\WarehouseController;
 use App\Modules\Order\Http\Controllers\Admin\OrderController;
 use App\Modules\Product\Http\Controllers\Admin\CategoryController;
 use App\Modules\Product\Http\Controllers\Admin\ProductController;
+use App\Modules\Purchasing\Http\Controllers\Admin\SupplierController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -41,6 +42,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/inventory/transfer', [InventoryController::class, 'transfer'])->name('inventory.transfer');
         Route::resource('warehouses', WarehouseController::class);
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+        Route::resource('suppliers', SupplierController::class)->only(['index', 'show', 'create']);
     });
 });
 
