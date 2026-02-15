@@ -33,8 +33,14 @@ const destroy = () => {
     <AdminLayout>
         <div class="space-y-6">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                    <div class="text-xs text-gray-500">Warehouses > Edit</div>
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400">
+                        <Link :href="route('dashboard')" class="hover:text-gray-700 dark:hover:text-gray-200">Dashboard</Link>
+                        <span>/</span>
+                        <Link :href="route('admin.warehouses.index')" class="hover:text-gray-700 dark:hover:text-gray-200">Warehouses</Link>
+                        <span>/</span>
+                        <span class="text-gray-900 dark:text-gray-200">Edit</span>
+                    </div>
                     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Edit Warehouse: {{ props.warehouse.name }}</h1>
                 </div>
                 <div class="flex items-center gap-3">

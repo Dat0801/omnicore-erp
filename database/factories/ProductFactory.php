@@ -26,7 +26,7 @@ class ProductFactory extends Factory
     public function definition(): array
     {
         $type = $this->faker->randomElement(['physical', 'service', 'digital']);
-        
+
         $data = [
             'name' => $this->faker->words(3, true), // fallback since commerce might not be loaded or syntax is wrong
             'sku' => $this->faker->unique()->bothify('SKU-####-????'),

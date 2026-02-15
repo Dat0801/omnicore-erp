@@ -184,7 +184,7 @@ const getStatusColor = (status) => {
                         <tbody class="bg-white divide-y divide-gray-200">
                             <tr v-for="order in orders.data" :key="order.id" class="hover:bg-gray-50 transition-colors">
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <a href="#" class="text-indigo-600 font-semibold hover:text-indigo-900">#ORD-{{ order.id }}</a>
+                                    <Link :href="route('admin.orders.show', order.id)" class="text-indigo-600 font-semibold hover:text-indigo-900">#ORD-{{ order.id }}</Link>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ formatDate(order.created_at) }}

@@ -5,12 +5,29 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role as SpatieRole;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
  */
 class UserFactory extends Factory
 {
+    public function configure(): static
+    {
+        return $this->afterCreating(function (\App\Models\User $user): void {
+            // If a legacy 'role' attribute was provided, mirror it into Spatie roles
+            $roleValue = null;
+            if (isset($user->getAttributes()['role']) && $user->role !== null) {
+                $roleValue = is_string($user->role) ? $user->role : ($user->role->value ?? null);
+            }
+
+            // Default to 'admin' for tests that expect unrestricted access
+            $roleToAssign = $roleValue ?: 'admin';
+            SpatieRole::firstOrCreate(['name' => $roleToAssign, 'guard_name' => 'web']);
+            $user->syncRoles([$roleToAssign]);
+        });
+    }
+
     /**
      * The current password being used by the factory.
      */
@@ -47,9 +64,10 @@ class UserFactory extends Factory
      */
     public function admin(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'role' => \App\Enums\Role::ADMIN,
-        ]);
+        return $this->afterCreating(function (\App\Models\User $user): void {
+            SpatieRole::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+            $user->syncRoles(['admin']);
+        });
     }
 
     /**
@@ -57,8 +75,9 @@ class UserFactory extends Factory
      */
     public function staff(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'role' => \App\Enums\Role::STAFF,
-        ]);
+        return $this->afterCreating(function (\App\Models\User $user): void {
+            SpatieRole::firstOrCreate(['name' => 'staff', 'guard_name' => 'web']);
+            $user->syncRoles(['staff']);
+        });
     }
 }

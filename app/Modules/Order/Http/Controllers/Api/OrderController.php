@@ -3,6 +3,7 @@
 namespace App\Modules\Order\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Order\Models\Order;
 use App\Modules\Order\Services\OrderService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -38,5 +39,36 @@ class OrderController extends Controller
                 'error' => $e->getMessage(),
             ], 422);
         }
+    }
+
+    public function updateStatus(Request $request, Order $order): JsonResponse
+    {
+        $data = $request->validate([
+            'status' => 'required|string',
+        ]);
+
+        $allowed = [
+            'pending' => ['confirmed', 'cancelled'],
+            'confirmed' => ['picking', 'cancelled'],
+            'picking' => ['packed', 'cancelled'],
+            'packed' => ['shipped', 'cancelled'],
+            'shipped' => ['delivered'],
+            'delivered' => ['refunded'],
+        ];
+
+        $current = $order->status;
+        $next = $data['status'];
+
+        if (! isset($allowed[$current]) || ! in_array($next, $allowed[$current], true)) {
+            return response()->json([
+                'message' => 'Invalid status transition',
+                'from' => $current,
+                'to' => $next,
+            ], 422);
+        }
+
+        $order->update(['status' => $next]);
+
+        return response()->json($order);
     }
 }

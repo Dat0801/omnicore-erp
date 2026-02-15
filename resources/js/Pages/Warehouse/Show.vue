@@ -101,13 +101,16 @@ const statusClasses = (item) => {
                         </svg>
                         Print Report
                     </button>
-                    <button class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
+                    <Link
+                        :href="route('admin.warehouses.edit', warehouse.id)"
+                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                    >
                         <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M4 13V3h12v10H4z" />
                             <path d="M2 17h16v2H2z" />
                         </svg>
                         Edit Warehouse
-                    </button>
+                    </Link>
                 </div>
             </div>
 

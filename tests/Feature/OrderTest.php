@@ -33,11 +33,14 @@ class OrderTest extends TestCase
             'is_active' => true,
         ]);
 
-        $category = ProductCategory::create(['name' => 'Test Category']);
+        $category = ProductCategory::create([
+            'name' => 'Test Category',
+            'slug' => 'test-category',
+        ]);
 
         $this->product = Product::create([
             'name' => 'Test Product',
-            'code' => 'TEST-001',
+            'sku' => 'TEST-001',
             'description' => 'Test Description',
             'price' => 100.00,
             'product_category_id' => $category->id,

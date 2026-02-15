@@ -3,7 +3,9 @@
 namespace App\Modules\Order\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Order\Http\Requests\UpdateOrderStatusRequest;
 use App\Modules\Order\Models\Order;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -63,5 +65,52 @@ class OrderController extends Controller
             'filters' => $request->only(['search', 'source', 'status']),
             'stats' => $stats,
         ]);
+    }
+
+    public function show(Order $order)
+    {
+        $order->load(['items.product', 'warehouse']);
+
+        $transitions = $this->allowedTransitions();
+        $nextStatuses = $transitions[$order->status] ?? [];
+
+        return Inertia::render('Order/Show', [
+            'order' => $order,
+            'next_statuses' => $nextStatuses,
+        ]);
+    }
+
+    public function updateStatus(UpdateOrderStatusRequest $request, Order $order): RedirectResponse
+    {
+        $data = $request->validated();
+
+        $transitions = $this->allowedTransitions();
+
+        $current = $order->status;
+        $next = $data['status'];
+
+        if (! isset($transitions[$current]) || ! in_array($next, $transitions[$current], true)) {
+            return back()->withErrors([
+                'status' => 'Trạng thái không hợp lệ cho đơn hàng hiện tại.',
+            ]);
+        }
+
+        $order->update(['status' => $next]);
+
+        return redirect()
+            ->route('admin.orders.show', $order->id)
+            ->with('success', 'Cập nhật trạng thái đơn hàng thành công.');
+    }
+
+    private function allowedTransitions(): array
+    {
+        return [
+            'pending' => ['confirmed', 'cancelled'],
+            'confirmed' => ['picking', 'cancelled'],
+            'picking' => ['packed', 'cancelled'],
+            'packed' => ['shipped', 'cancelled'],
+            'shipped' => ['delivered'],
+            'delivered' => ['refunded'],
+        ];
     }
 }

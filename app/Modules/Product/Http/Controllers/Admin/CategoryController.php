@@ -5,8 +5,8 @@ namespace App\Modules\Product\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Modules\Product\Http\Requests\StoreProductCategoryRequest;
 use App\Modules\Product\Http\Requests\UpdateProductCategoryRequest;
-use App\Modules\Product\Models\ProductCategory;
 use App\Modules\Product\Models\Product;
+use App\Modules\Product\Models\ProductCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -63,10 +63,10 @@ class CategoryController extends Controller
     {
         $data = $request->validated();
         $data['slug'] = Str::slug($data['name']);
-        
+
         if ($request->hasFile('icon')) {
-             $path = $request->file('icon')->store('categories', 'public');
-             $data['icon'] = Storage::url($path);
+            $path = $request->file('icon')->store('categories', 'public');
+            $data['icon'] = Storage::url($path);
         }
 
         ProductCategory::create($data);
@@ -93,13 +93,13 @@ class CategoryController extends Controller
     public function assignProduct(Request $request, ProductCategory $category)
     {
         $request->validate([
-            'product_id' => 'required|exists:products,id'
+            'product_id' => 'required|exists:products,id',
         ]);
-        
+
         $product = Product::findOrFail($request->product_id);
         $product->product_category_id = $category->id;
         $product->save();
-        
+
         return back()->with('success', 'Product assigned to category.');
     }
 
@@ -109,7 +109,7 @@ class CategoryController extends Controller
             $product->product_category_id = null;
             $product->save();
         }
-        
+
         return back()->with('success', 'Product removed from category.');
     }
 

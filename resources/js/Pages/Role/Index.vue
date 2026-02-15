@@ -1,6 +1,6 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 
@@ -71,22 +71,26 @@ const summaryCards = computed(() => ([
     {
         label: 'Total Roles',
         value: props.roles?.length ?? 0,
-        note: 'Active permissions',
+        note: 'Configured in system',
         tone: 'blue',
     },
     {
         label: 'Active Permissions',
-        value: 154,
-        note: 'Across all roles',
+        value: props.stats?.permissions ?? 0,
+        note: 'Across all modules',
         tone: 'emerald',
     },
     {
         label: 'Recent Changes',
-        value: 3,
-        note: 'Today',
+        value: props.stats?.recentPermissionUpdates ?? 0,
+        note: 'Permissions updated in last 24h',
         tone: 'amber',
     },
 ]));
+
+const goToCreateRole = () => {
+    router.get(route('admin.roles.create'));
+};
 </script>
 
 <template>
@@ -99,7 +103,7 @@ const summaryCards = computed(() => ([
                     <h2 class="text-2xl font-bold text-gray-900">Role Management</h2>
                     <p class="text-sm text-gray-500 mt-1">Define and maintain access control levels across the enterprise.</p>
                 </div>
-                <PrimaryButton>
+                <PrimaryButton @click="goToCreateRole">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                     </svg>

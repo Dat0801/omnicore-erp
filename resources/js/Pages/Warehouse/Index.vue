@@ -58,8 +58,12 @@ const managerInitials = (name) => {
         <div class="space-y-6">
             <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div class="space-y-1">
-                    <div class="text-xs text-gray-500">Home / Warehouses</div>
-                    <h2 class="text-2xl font-bold text-gray-900">Warehouse Management</h2>
+                    <div class="flex items-center gap-2 text-xs font-medium text-gray-500">
+                        <Link :href="route('dashboard')" class="hover:text-gray-700">Dashboard</Link>
+                        <span>/</span>
+                        <span class="text-gray-900">Warehouses</span>
+                    </div>
+                    <h1 class="text-2xl font-bold text-gray-900">Warehouse Management</h1>
                 </div>
                 <Link :href="route('admin.warehouses.create')" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700">
                     <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">

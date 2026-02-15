@@ -2,12 +2,12 @@
 
 namespace App\Modules\Product\Models;
 
+use App\Modules\Inventory\Models\Inventory;
+use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Modules\Inventory\Models\Inventory;
-use Database\Factories\ProductFactory;
 
 class Product extends Model
 {

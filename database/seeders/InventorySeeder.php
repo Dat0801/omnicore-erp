@@ -35,14 +35,14 @@ class InventorySeeder extends Seeder
             $product = Product::where('sku', $sku)->first();
             if ($product) {
                 // Check if stock already exists to prevent duplicate seeding (optional but good for idempotency)
-                // However, InventoryService::addStock adds to existing. 
+                // However, InventoryService::addStock adds to existing.
                 // We might want to "set" stock or check if inventory record exists.
                 // For simplicity in seeder, we can check if inventory exists for this product+warehouse
-                
+
                 $exists = $product->inventories()->where('warehouse_id', $warehouse->id)->exists();
-                
-                if (!$exists) {
-                     $service->addStock($warehouse->id, $product->id, $qty, 'Initial stock seeding', null);
+
+                if (! $exists) {
+                    $service->addStock($warehouse->id, $product->id, $qty, 'Initial stock seeding', null);
                 }
             }
         }
