@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
-use App\Enums\Role;
+use App\Enums\Role as LegacyRole;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -47,25 +48,25 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'role' => Role::class,
+            'role' => LegacyRole::class,
             'is_active' => 'boolean',
             'last_login_at' => 'datetime',
         ];
     }
 
     /**
-     * Check if the user is an admin.
+     * Check if the user is an admin (Spatie role).
      */
     public function isAdmin(): bool
     {
-        return $this->role === Role::ADMIN;
+        return $this->hasRole('admin');
     }
 
     /**
-     * Check if the user is a staff member.
+     * Check if the user is a staff member (Spatie role).
      */
     public function isStaff(): bool
     {
-        return $this->role === Role::STAFF;
+        return $this->hasRole('staff');
     }
 }

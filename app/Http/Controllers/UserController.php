@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
@@ -22,7 +22,7 @@ class UserController extends Controller
         }
 
         if ($request->filled('role') && $request->input('role') !== 'all') {
-            $query->where('role', $request->input('role'));
+            $query->role($request->input('role'));
         }
 
         if ($request->filled('status') && $request->input('status') !== 'all') {
@@ -37,7 +37,7 @@ class UserController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'role' => $user->role,
+                'role' => $user->getRoleNames()->first(),
                 'is_active' => $user->is_active,
                 'last_login_at' => $user->last_login_at ? $user->last_login_at->format('M d, Y · H:i A') : 'Never',
                 'avatar_url' => 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&color=7F9CF5&background=EBF4FF',
@@ -46,9 +46,9 @@ class UserController extends Controller
         return Inertia::render('User/Index', [
             'users' => $users,
             'filters' => $request->only(['search', 'role', 'status']),
-            'roles' => collect(Role::cases())->map(fn ($role) => [
-                'value' => $role->value,
-                'label' => $role->label(),
+            'roles' => Role::query()->orderBy('name')->get()->map(fn ($r) => [
+                'value' => $r->name,
+                'label' => ucfirst($r->name),
             ]),
         ]);
     }

@@ -207,7 +207,7 @@ const riskLevel = () => {
                                     </tr>
                                     <tr v-if="products.data.length === 0">
                                         <td colspan="4" class="px-6 py-10 text-center text-sm text-gray-500">
-                                            Chưa có sản phẩm nào từ nhà cung cấp này.
+                                            No products from this supplier yet.
                                         </td>
                                     </tr>
                                 </tbody>
@@ -240,4 +240,3 @@ const riskLevel = () => {
         </div>
     </AdminLayout>
 </template>
-

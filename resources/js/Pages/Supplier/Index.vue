@@ -156,7 +156,7 @@ const initials = (name) => {
                             </tr>
                             <tr v-if="suppliers.data.length === 0">
                                 <td colspan="4" class="px-6 py-10 text-center text-sm text-gray-500">
-                                    Không có nhà cung cấp nào.
+                                    No suppliers found.
                                 </td>
                             </tr>
                         </tbody>
@@ -188,4 +188,3 @@ const initials = (name) => {
         </div>
     </AdminLayout>
 </template>
-

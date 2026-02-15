@@ -10,6 +10,12 @@ const form = useForm({
     address: '',
     is_active: true,
 });
+
+function submit() {
+    form.post(route('admin.suppliers.store'), {
+        preserveScroll: true,
+    });
+}
 </script>
 
 <template>
@@ -53,7 +59,12 @@ const form = useForm({
                     </div>
                 </div>
                 <div class="mt-6">
-                    <button type="button" class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700" @click="/* handled by backend later */ null">
+                    <button
+                        type="button"
+                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:opacity-60"
+                        :disabled="form.processing"
+                        @click="submit"
+                    >
                         Save Supplier
                     </button>
                 </div>
@@ -61,4 +72,3 @@ const form = useForm({
         </div>
     </AdminLayout>
     </template>
-

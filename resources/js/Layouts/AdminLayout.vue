@@ -125,6 +125,13 @@ onMounted(() => {
                     Suppliers
                 </SidebarLink>
                 
+                <SidebarLink :href="route('admin.purchase-orders.index')" :active="route().current('admin.purchase-orders.*')">
+                    <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-blue-600" :class="{ 'text-blue-600': route().current('admin.purchase-orders.*') }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h14M3 12h14M3 17h14M17 7h4M17 12h4M17 17h4" />
+                    </svg>
+                    Purchase Orders
+                </SidebarLink>
+                
                 <div class="pt-4 pb-2">
                     <p class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">Sales</p>
                 </div>

@@ -3,13 +3,17 @@
 namespace App\Modules\Purchasing\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Modules\Inventory\Models\Inventory;
+use App\Modules\Purchasing\Http\Requests\StoreSupplierRequest;
 use App\Modules\Purchasing\Models\PurchaseOrder;
 use App\Modules\Purchasing\Models\PurchaseOrderItem;
 use App\Modules\Purchasing\Models\Supplier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
+use Spatie\Permission\Models\Role;
 
 class SupplierController extends Controller
 {
@@ -148,5 +152,41 @@ class SupplierController extends Controller
     public function create()
     {
         return Inertia::render('Supplier/Create');
+    }
+
+    public function store(StoreSupplierRequest $request)
+    {
+        $data = $request->validated();
+
+        return DB::transaction(function () use ($data) {
+            $supplier = Supplier::create([
+                'name' => $data['name'],
+                'email' => $data['email'] ?? null,
+                'phone' => $data['phone'] ?? null,
+                'tax_id' => $data['tax_id'] ?? null,
+                'address' => $data['address'] ?? null,
+                'is_active' => $data['is_active'] ?? true,
+            ]);
+
+            if (! empty($data['email'])) {
+                $user = User::firstOrCreate(
+                    ['email' => $data['email']],
+                    [
+                        'name' => $data['name'],
+                        'password' => Str::random(24),
+                        'is_active' => true,
+                    ]
+                );
+
+                Role::firstOrCreate(['name' => 'supplier', 'guard_name' => 'web']);
+                if (! $user->hasRole('supplier')) {
+                    $user->assignRole('supplier');
+                }
+            }
+
+            return redirect()
+                ->route('admin.suppliers.show', $supplier)
+                ->with('success', 'Supplier created successfully.');
+        });
     }
 }

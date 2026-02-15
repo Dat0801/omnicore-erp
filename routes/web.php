@@ -8,6 +8,7 @@ use App\Modules\Inventory\Http\Controllers\WarehouseController;
 use App\Modules\Order\Http\Controllers\Admin\OrderController;
 use App\Modules\Product\Http\Controllers\Admin\CategoryController;
 use App\Modules\Product\Http\Controllers\Admin\ProductController;
+use App\Modules\Purchasing\Http\Controllers\Admin\PurchaseOrderController as PoAdminController;
 use App\Modules\Purchasing\Http\Controllers\Admin\SupplierController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -42,7 +43,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/inventory/transfer', [InventoryController::class, 'transfer'])->name('inventory.transfer');
         Route::resource('warehouses', WarehouseController::class);
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-        Route::resource('suppliers', SupplierController::class)->only(['index', 'show', 'create']);
+        Route::resource('suppliers', SupplierController::class)->only(['index', 'show', 'create', 'store']);
+        Route::get('purchase-orders', [PoAdminController::class, 'index'])->name('purchase-orders.index');
+        Route::get('purchase-orders/create', [PoAdminController::class, 'create'])->name('purchase-orders.create');
     });
 });
 
